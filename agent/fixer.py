@@ -1,21 +1,33 @@
-from groq import Groq
 import os
 from dotenv import load_dotenv
+from groq import Groq
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+API_KEY = os.getenv("GROQ_API_KEY")
 
-MODEL = "openai/gpt-oss-20b"
+if not API_KEY:
+    raise ValueError("❌ GROQ_API_KEY not found in .env")
+
+client = Groq(api_key=API_KEY)
+
+MODEL = "llama3-70b-8192"   # ✅ FIXED
 
 
 def fix_code(error, code):
-    prompt = (
-        "Fix the following Python code.\n\n"
-        "Error:\n" + error + "\n\n"
-        "Code:\n" + code + "\n\n"
-        "Return ONLY corrected full code."
-    )
+    prompt = f"""
+Fix this Python code.
+
+Error:
+{error}
+
+Code:
+{code}
+
+Rules:
+- Return ONLY valid python code
+- No explanation
+"""
 
     response = client.chat.completions.create(
         model=MODEL,

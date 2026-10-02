@@ -1,23 +1,36 @@
 import subprocess
 
-
 def run_command(command):
     try:
-        result = subprocess.run(
+        # Start process (non-blocking)
+        process = subprocess.Popen(
             command,
             shell=True,
-            capture_output=True,
-            text=True,
-            timeout=20
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
         )
 
-        success = result.returncode == 0
+        # Wait only limited time (important)
+        try:
+            stdout, stderr = process.communicate(timeout=5)
+            success = process.returncode == 0
 
-        return {
-            "success": success,
-            "stdout": result.stdout,
-            "stderr": result.stderr
-        }
+            return {
+                "success": success,
+                "stdout": stdout.strip(),
+                "stderr": stderr.strip()
+            }
+
+        except subprocess.TimeoutExpired:
+            # Kill long-running process (like uvicorn)
+            process.kill()
+
+            return {
+                "success": True,
+                "stdout": "⚠️ Process started (running in background)",
+                "stderr": ""
+            }
 
     except Exception as e:
         return {

@@ -2,7 +2,7 @@ from agent.planner import create_plan
 from agent.executor import execute_plan
 from agent.memory import save_memory, search_memory
 
-task = "Create FastAPI app but do NOT import FastAPI"
+task = input("Enter your task: ")
 
 print("\n🧠 Checking Memory...")
 memory_plan = search_memory(task)
@@ -19,4 +19,7 @@ print("\n🧠 PLAN:\n")
 print(plan)
 
 print("\n🚀 Executing Plan...")
-execute_plan(plan)
+result = execute_plan(plan)
+
+print("\n📊 RESULT:")
+print(result)

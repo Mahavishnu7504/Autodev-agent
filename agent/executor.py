@@ -13,7 +13,6 @@ def extract_python_code(plan):
 
 
 def clean_code(code):
-    # 🔥 Remove markdown if LLM returns ```python blocks
     code = re.sub(r"```python", "", code)
     code = re.sub(r"```", "", code)
     return code.strip()
@@ -33,7 +32,6 @@ def execute_plan(plan):
 
     print("\n⚙️ Running code...")
 
-    # 🔁 Retry loop (self-healing)
     for attempt in range(3):
         result = run_command("python main.py")
 
@@ -48,6 +46,9 @@ def execute_plan(plan):
         fixed_code = fix_code(result["stderr"], code)
 
         fixed_code = clean_code(fixed_code)
+
+        if not fixed_code.strip():
+            return ["❌ Fixer returned empty code"]
 
         create_file(filename, fixed_code)
         code = fixed_code

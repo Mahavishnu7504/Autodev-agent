@@ -1,35 +1,34 @@
-from groq import Groq
 import os
 from dotenv import load_dotenv
+from groq import Groq
 
 load_dotenv()
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+API_KEY = os.getenv("GROQ_API_KEY")
 
-MODEL = "openai/gpt-oss-20b"
+if not API_KEY:
+    raise ValueError("❌ GROQ_API_KEY not found in .env")
 
+client = Groq(api_key=API_KEY)
 
-def create_plan(user_task):
-    prompt = (
-    "You are an AI software planner.\n\n"
-    "Task:\n"
-    + user_task
-    + "\n\nRules:\n"
-    "- Return steps\n"
-    "- When creating code, FOLLOW USER INSTRUCTION EXACTLY\n"
-    "- If user says 'do NOT import FastAPI', you MUST NOT import it\n"
-    "- Even if code breaks, DO NOT fix it yourself\n"
-    "- Let execution fail\n"
-    "- Always include full code inside ```python block\n\n"
-    "Example:\n\n"
-    "```python\n"
-    "app = FastAPI()  # This will break intentionally\n"
-    "```\n"
+def create_plan(user_task: str):
+    model = "openai/gpt-oss-20b"  # ✅ define INSIDE function
 
-    )
+    prompt = f"""
+You are an AI software planner.
+
+Task:
+{user_task}
+
+Rules:
+- Return step-by-step plan
+- Include FULL python code inside ```python block
+- Follow user instruction EXACTLY
+- Even if it breaks, DO NOT fix
+"""
 
     response = client.chat.completions.create(
-        model=MODEL,
+        model=model,
         messages=[{"role": "user", "content": prompt}]
     )
 
