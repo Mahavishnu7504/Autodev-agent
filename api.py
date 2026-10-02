@@ -2,34 +2,40 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from agent.planner import create_plan
 from agent.executor import execute_plan
+from agent.memory import save_memory, search_memory
 
 app = FastAPI()
+
 
 class TaskRequest(BaseModel):
     task: str
 
-@app.get("/")
-def home():
-    return {"message": "AutoDev Agent API is running 🚀"}
 
 @app.post("/run-task")
-def run_task(request: TaskRequest):
-    try:
-        print("\n🧠 Generating Plan...")
-        plan = create_plan(request.task)
+def run_task(req: TaskRequest):
 
-        print("\n🚀 Executing Plan...")
-        result = execute_plan(plan)
+    print("🧠 Checking Memory...")
+    memory = search_memory(req.task)
 
+    if memory:
         return {
             "status": "success",
-            "task": request.task,
-            "plan": plan,
-            "result": str(result)
+            "task": req.task,
+            "plan": memory,
+            "result": "⚡ Retrieved from memory"
         }
 
-    except Exception as e:
-        return {
-            "status": "error",
-            "message": str(e)
-        }
+    print("🧠 Generating Plan...")
+    plan = create_plan(req.task)
+
+    print("🚀 Executing Plan...")
+    result = execute_plan(plan)
+
+    save_memory(req.task, plan)
+
+    return {
+        "status": "success" if result["success"] else "error",
+        "task": req.task,
+        "plan": plan,
+        "result": result
+    }

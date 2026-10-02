@@ -1,37 +1,56 @@
 import os
+import time
 from dotenv import load_dotenv
 from groq import Groq
+from config import MODEL_FALLBACKS, MAX_RETRIES
 
 load_dotenv()
 
 API_KEY = os.getenv("GROQ_API_KEY")
 
 if not API_KEY:
-    raise ValueError("❌ GROQ_API_KEY not found in .env")
+    raise ValueError("GROQ_API_KEY not found")
 
 client = Groq(api_key=API_KEY)
 
-MODEL = "llama3-70b-8192"   # ✅ FIXED
 
+def fix_code(code: str, error: str) -> str:
 
-def fix_code(error, code):
-    prompt = f"""
-Fix this Python code.
+    prompt = f"""You are an expert Python debugger.
 
-Error:
+The following code failed:
+
+{code}
+
+ERROR:
 {error}
 
-Code:
-{code}
+Fix the code so it runs successfully.
 
 Rules:
 - Return ONLY valid python code
-- No explanation
+- Do not explain anything
+- Do not use input()
+- Use hardcoded values
 """
 
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    last_error = None
 
-    return response.choices[0].message.content
+    for model in MODEL_FALLBACKS:
+        for attempt in range(MAX_RETRIES):
+            try:
+                print(f"Fixing with {model} (attempt {attempt+1})")
+
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}]
+                )
+
+                return response.choices[0].message.content
+
+            except Exception as e:
+                last_error = str(e)
+                print(f"Failed: {model} -> {last_error}")
+                time.sleep(1)
+
+    return f"# Failed to fix code\n# Error: {last_error}"

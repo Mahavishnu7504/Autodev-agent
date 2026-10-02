@@ -1,21 +1,13 @@
-import os
-from dotenv import load_dotenv
+import time
 from groq import Groq
+from config import GROQ_API_KEY, MODEL_FALLBACKS, MAX_RETRIES
 
-load_dotenv()
+client = Groq(api_key=GROQ_API_KEY)
 
-API_KEY = os.getenv("GROQ_API_KEY")
-
-if not API_KEY:
-    raise ValueError("❌ GROQ_API_KEY not found in .env")
-
-client = Groq(api_key=API_KEY)
 
 def create_plan(user_task: str):
-    model = "openai/gpt-oss-20b"  # ✅ define INSIDE function
 
-    prompt = f"""
-You are an AI software planner.
+    prompt = f"""You are an AI software planner.
 
 Task:
 {user_task}
@@ -25,11 +17,28 @@ Rules:
 - Include FULL python code inside ```python block
 - Follow user instruction EXACTLY
 - Even if it breaks, DO NOT fix
+- DO NOT use input()
+- Use hardcoded test values instead
 """
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}]
-    )
+    last_error = None
 
-    return response.choices[0].message.content
+    for model in MODEL_FALLBACKS:
+        for attempt in range(MAX_RETRIES):
+            try:
+                print(f"⚡ Trying model: {model} (attempt {attempt+1})")
+
+                response = client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0
+                )
+
+                return response.choices[0].message.content
+
+            except Exception as e:
+                last_error = str(e)
+                print(f"❌ Failed: {model} -> {last_error}")
+                time.sleep(1)
+
+    return f"❌ All models failed: {last_error}"

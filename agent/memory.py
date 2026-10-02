@@ -1,8 +1,8 @@
 from chromadb import Client
 from chromadb.config import Settings
+import uuid
 
 client = Client(Settings(persist_directory="./memory"))
-
 collection = client.get_or_create_collection("autodev")
 
 
@@ -10,7 +10,7 @@ def save_memory(task, plan):
     collection.add(
         documents=[plan],
         metadatas=[{"task": task}],
-        ids=[task]
+        ids=[str(uuid.uuid4())]  # 🔥 FIXED
     )
 
 

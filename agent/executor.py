@@ -1,56 +1,51 @@
-import re
-import textwrap
-from tools.file_tool import create_file
-from tools.shell_tool import run_command
+import subprocess
+import tempfile
 from agent.fixer import fix_code
 
 
-def extract_python_code(plan):
-    match = re.search(r"```python(.*?)```", plan, re.DOTALL)
-    if match:
-        return textwrap.dedent(match.group(1)).strip()
-    return None
-
-
-def clean_code(code):
-    code = re.sub(r"```python", "", code)
-    code = re.sub(r"```", "", code)
-    return code.strip()
-
-
 def execute_plan(plan):
-    filename = "main.py"
-    code = extract_python_code(plan)
+
+    code = extract_code(plan)
 
     if not code:
-        return ["❌ No code found"]
-
-    code = clean_code(code)
-
-    print("\n⚙️ Creating file...")
-    create_file(filename, code)
-
-    print("\n⚙️ Running code...")
+        return {"success": False, "error": "No code found"}
 
     for attempt in range(3):
-        result = run_command("python main.py")
+        result = run_code(code)
 
         if result["success"]:
-            print("✅ Code ran successfully")
             return result
 
-        print(f"\n❌ Error (attempt {attempt+1}):")
-        print(result["stderr"])
+        print("🛠 Fixing code...")
+        code = extract_code(fix_code(code, result["stderr"]))
 
-        print("\n🛠️ Fixing code...")
-        fixed_code = fix_code(result["stderr"], code)
+    return {"success": False, "error": "Failed after retries"}
 
-        fixed_code = clean_code(fixed_code)
 
-        if not fixed_code.strip():
-            return ["❌ Fixer returned empty code"]
+def extract_code(text):
+    if "```python" in text:
+        return text.split("```python")[1].split("```")[0]
+    return text
 
-        create_file(filename, fixed_code)
-        code = fixed_code
 
-    return ["❌ Failed after retries"]
+def run_code(code):
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".py") as f:
+            f.write(code.encode())
+            path = f.name
+
+        result = subprocess.run(
+            ["python", path],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
+        return {
+            "success": result.returncode == 0,
+            "stdout": result.stdout,
+            "stderr": result.stderr
+        }
+
+    except Exception as e:
+        return {"success": False, "stderr": str(e)}
