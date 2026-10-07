@@ -32,10 +32,6 @@
             color: #e2e8f0;
         }
 
-        /* =====================================================
-           HEADER
-        ===================================================== */
-
         header {
 
             padding: 24px 32px;
@@ -60,11 +56,6 @@
             color: #94a3b8;
         }
 
-
-        /* =====================================================
-           MAIN LAYOUT
-        ===================================================== */
-
         .container {
 
             display: grid;
@@ -75,11 +66,6 @@
             min-height:
                 calc(100vh - 105px);
         }
-
-
-        /* =====================================================
-           SIDEBAR
-        ===================================================== */
 
         .sidebar {
 
@@ -93,11 +79,6 @@
             overflow-y: auto;
         }
 
-
-        /* =====================================================
-           CONTENT / PREVIEW COLUMN
-        ===================================================== */
-
         .content {
 
             padding: 24px;
@@ -106,11 +87,6 @@
 
             position: relative;
         }
-
-
-        /* =====================================================
-           BUTTONS
-        ===================================================== */
 
         button {
 
@@ -129,19 +105,24 @@
             color: white;
 
             font-size: 14px;
+
+            transition:
+                background 0.2s,
+                transform 0.1s;
         }
 
         button:hover {
 
             background: #1d4ed8;
+
+            transform:
+                translateY(-1px);
         }
-
-
-        /* Clear Preview button */
 
         .clear-preview {
 
-            margin: 0 0 18px 0;
+            margin:
+                0 0 18px 0;
 
             background: #475569;
 
@@ -152,11 +133,6 @@
 
             background: #64748b;
         }
-
-
-        /* =====================================================
-           GENERATED FILE CARD
-        ===================================================== */
 
         .file {
 
@@ -181,10 +157,24 @@
             word-break: break-all;
         }
 
+        .file-actions {
 
-        /* =====================================================
-           STATUS
-        ===================================================== */
+            display: flex;
+
+            flex-wrap: wrap;
+
+            gap: 4px;
+        }
+
+        .delete-button {
+
+            background: #dc2626;
+        }
+
+        .delete-button:hover {
+
+            background: #b91c1c;
+        }
 
         .status {
 
@@ -198,11 +188,6 @@
 
             color: #94a3b8;
         }
-
-
-        /* =====================================================
-           CODE PREVIEW
-        ===================================================== */
 
         .preview {
 
@@ -236,18 +221,12 @@
             line-height: 1.6;
         }
 
-
-        /* =====================================================
-           EMPTY STATE
-        ===================================================== */
-
         .empty {
 
             color: #64748b;
 
             padding: 20px 0;
         }
-
 
         .preview-empty {
 
@@ -260,10 +239,14 @@
             min-height: 500px;
         }
 
+        .file-count {
 
-        /* =====================================================
-           RESPONSIVE
-        ===================================================== */
+            color: #94a3b8;
+
+            margin-bottom: 12px;
+
+            font-size: 14px;
+        }
 
         @media (
             max-width: 900px
@@ -282,7 +265,6 @@
                 border-bottom:
                     1px solid #334155;
             }
-
         }
 
     </style>
@@ -292,10 +274,6 @@
 
 <body>
 
-
-<!-- =========================================================
-     HEADER
-========================================================= -->
 
 <header>
 
@@ -309,10 +287,6 @@
 </header>
 
 
-<!-- =========================================================
-     MAIN CONTAINER
-========================================================= -->
-
 <div class="container">
 
 
@@ -324,12 +298,18 @@
 
         <h2>📁 Generated Files</h2>
 
-        <button onclick="loadFiles()">
-
+        <button
+            onclick="loadFiles()"
+        >
             🔄 Refresh Files
-
         </button>
 
+        <div
+            id="file-count"
+            class="file-count"
+        >
+            Loading files...
+        </div>
 
         <div id="files">
 
@@ -347,15 +327,13 @@
     <main class="content">
 
 
-        <!-- CLEAR PREVIEW BUTTON -->
+        <!-- CLEAR PREVIEW -->
 
         <button
             class="clear-preview"
             onclick="clearPreview()"
         >
-
             🔄 Clear Preview
-
         </button>
 
 
@@ -365,18 +343,14 @@
             id="status"
             class="status"
         >
-
             Select a generated file to preview it.
-
         </div>
 
 
         <!-- CODE TITLE -->
 
         <h2>
-
             📄 Code Preview
-
         </h2>
 
 
@@ -402,6 +376,13 @@
 
 
 // ============================================================
+// CURRENTLY SELECTED FILE
+// ============================================================
+
+let selectedFile = null;
+
+
+// ============================================================
 // LOAD GENERATED FILES
 // ============================================================
 
@@ -412,18 +393,20 @@ async function loadFiles() {
             "files"
         );
 
+    const count =
+        document.getElementById(
+            "file-count"
+        );
 
     try {
 
         container.innerHTML =
             "Loading...";
 
-
         const response =
             await fetch(
                 "/generated-files"
             );
-
 
         if (!response.ok) {
 
@@ -431,16 +414,15 @@ async function loadFiles() {
                 "HTTP " +
                 response.status
             );
-
         }
-
 
         const data =
             await response.json();
 
+        container.innerHTML = "";
 
-        container.innerHTML =
-            "";
+        count.textContent =
+            `${data.count || 0} generated file(s)`;
 
 
         if (
@@ -454,51 +436,66 @@ async function loadFiles() {
                 '</div>';
 
             return;
-
         }
 
 
         data.files.forEach(
             function(file) {
 
+                // ------------------------------------------------
+                // CARD
+                // ------------------------------------------------
+
                 const wrapper =
                     document.createElement(
                         "div"
                     );
 
-
                 wrapper.className =
                     "file";
 
 
+                // ------------------------------------------------
                 // FILE NAME
+                // ------------------------------------------------
 
                 const name =
                     document.createElement(
                         "div"
                     );
 
-
                 name.className =
                     "file-name";
-
 
                 name.textContent =
                     "🐍 " +
                     file.name;
 
 
+                // ------------------------------------------------
+                // ACTION CONTAINER
+                // ------------------------------------------------
+
+                const actions =
+                    document.createElement(
+                        "div"
+                    );
+
+                actions.className =
+                    "file-actions";
+
+
+                // ------------------------------------------------
                 // VIEW BUTTON
+                // ------------------------------------------------
 
                 const viewButton =
                     document.createElement(
                         "button"
                     );
 
-
                 viewButton.textContent =
                     "👁 View";
-
 
                 viewButton.onclick =
                     function() {
@@ -510,17 +507,17 @@ async function loadFiles() {
                     };
 
 
+                // ------------------------------------------------
                 // DOWNLOAD BUTTON
+                // ------------------------------------------------
 
                 const downloadButton =
                     document.createElement(
                         "button"
                     );
 
-
                 downloadButton.textContent =
                     "⬇ Download";
-
 
                 downloadButton.onclick =
                     function() {
@@ -531,22 +528,55 @@ async function loadFiles() {
                     };
 
 
-                // ADD ELEMENTS
+                // ------------------------------------------------
+                // DELETE BUTTON
+                // ------------------------------------------------
+
+                const deleteButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                deleteButton.textContent =
+                    "🗑 Delete";
+
+                deleteButton.className =
+                    "delete-button";
+
+                deleteButton.onclick =
+                    function() {
+
+                        deleteFile(
+                            file.name
+                        );
+
+                    };
+
+
+                // ------------------------------------------------
+                // ADD BUTTONS
+                // ------------------------------------------------
+
+                actions.appendChild(
+                    viewButton
+                );
+
+                actions.appendChild(
+                    downloadButton
+                );
+
+                actions.appendChild(
+                    deleteButton
+                );
+
 
                 wrapper.appendChild(
                     name
                 );
 
-
                 wrapper.appendChild(
-                    viewButton
+                    actions
                 );
-
-
-                wrapper.appendChild(
-                    downloadButton
-                );
-
 
                 container.appendChild(
                     wrapper
@@ -557,11 +587,13 @@ async function loadFiles() {
 
     }
 
-
     catch (error) {
 
         container.innerHTML =
             "❌ Failed to load files.";
+
+        count.textContent =
+            "Unable to load file count.";
 
         console.error(error);
 
@@ -582,7 +614,6 @@ async function viewFile(
         document.getElementById(
             "preview"
         );
-
 
     const status =
         document.getElementById(
@@ -617,7 +648,6 @@ async function viewFile(
                 "HTTP " +
                 response.status
             );
-
         }
 
 
@@ -634,28 +664,118 @@ async function viewFile(
         );
 
 
+        selectedFile =
+            filename;
+
+
         status.textContent =
             "Viewing: " +
             filename;
 
     }
 
-
     catch (error) {
 
         preview.textContent =
             "❌ Unable to load code.";
 
-
         preview.classList.add(
             "preview-empty"
         );
-
 
         status.textContent =
             "Error: " +
             error.message;
 
+        console.error(error);
+
+    }
+
+}
+
+
+// ============================================================
+// DELETE GENERATED FILE
+// ============================================================
+
+async function deleteFile(
+    filename
+) {
+
+    const confirmed =
+        window.confirm(
+            `Are you sure you want to delete "${filename}"?`
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/generated-files/" +
+                encodeURIComponent(
+                    filename
+                ),
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.detail ||
+                "Failed to delete file."
+            );
+
+        }
+
+
+        // ----------------------------------------------------
+        // CLEAR PREVIEW IF DELETED FILE WAS OPEN
+        // ----------------------------------------------------
+
+        if (
+            selectedFile === filename
+        ) {
+
+            clearPreview();
+
+        }
+
+
+        // ----------------------------------------------------
+        // REFRESH FILE LIST
+        // ----------------------------------------------------
+
+        await loadFiles();
+
+
+        console.log(
+            "Deleted:",
+            filename
+        );
+
+    }
+
+    catch (error) {
+
+        alert(
+            "❌ Delete failed: " +
+            error.message
+        );
 
         console.error(error);
 
@@ -675,7 +795,6 @@ function clearPreview() {
             "preview"
         );
 
-
     const status =
         document.getElementById(
             "status"
@@ -693,6 +812,10 @@ function clearPreview() {
 
     status.textContent =
         "Select a generated file to preview it.";
+
+
+    selectedFile =
+        null;
 
 }
 
@@ -721,6 +844,7 @@ loadFiles();
 // Make sure preview starts empty
 
 clearPreview();
+
 
 </script>
 
