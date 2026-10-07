@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>AutoDev Agent</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #0f172a;
+
+            color: #e2e8f0;
+        }
+
+        /* =====================================================
+           HEADER
+        ===================================================== */
+
+        header {
+
+            padding: 24px 32px;
+
+            background: #111827;
+
+            border-bottom:
+                1px solid #334155;
+        }
+
+        header h1 {
+
+            margin: 0;
+
+            color: #38bdf8;
+        }
+
+        header p {
+
+            margin-top: 8px;
+
+            color: #94a3b8;
+        }
+
+
+        /* =====================================================
+           MAIN LAYOUT
+        ===================================================== */
+
+        .container {
+
+            display: grid;
+
+            grid-template-columns:
+                360px 1fr;
+
+            min-height:
+                calc(100vh - 105px);
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ===================================================== */
+
+        .sidebar {
+
+            padding: 24px;
+
+            background: #111827;
+
+            border-right:
+                1px solid #334155;
+
+            overflow-y: auto;
+        }
+
+
+        /* =====================================================
+           CONTENT / PREVIEW COLUMN
+        ===================================================== */
+
+        .content {
+
+            padding: 24px;
+
+            overflow-y: auto;
+
+            position: relative;
+        }
+
+
+        /* =====================================================
+           BUTTONS
+        ===================================================== */
+
+        button {
+
+            border: none;
+
+            padding: 9px 13px;
+
+            margin: 4px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            background: #2563eb;
+
+            color: white;
+
+            font-size: 14px;
+        }
+
+        button:hover {
+
+            background: #1d4ed8;
+        }
+
+
+        /* Clear Preview button */
+
+        .clear-preview {
+
+            margin: 0 0 18px 0;
+
+            background: #475569;
+
+            font-weight: 600;
+        }
+
+        .clear-preview:hover {
+
+            background: #64748b;
+        }
+
+
+        /* =====================================================
+           GENERATED FILE CARD
+        ===================================================== */
+
+        .file {
+
+            margin-top: 12px;
+
+            padding: 14px;
+
+            background: #1e293b;
+
+            border:
+                1px solid #334155;
+
+            border-radius: 8px;
+        }
+
+        .file-name {
+
+            font-weight: bold;
+
+            margin-bottom: 8px;
+
+            word-break: break-all;
+        }
+
+
+        /* =====================================================
+           STATUS
+        ===================================================== */
+
+        .status {
+
+            padding: 14px;
+
+            margin-bottom: 20px;
+
+            background: #1e293b;
+
+            border-radius: 8px;
+
+            color: #94a3b8;
+        }
+
+
+        /* =====================================================
+           CODE PREVIEW
+        ===================================================== */
+
+        .preview {
+
+            background: #020617;
+
+            border:
+                1px solid #334155;
+
+            border-radius: 8px;
+
+            overflow: auto;
+        }
+
+        pre {
+
+            margin: 0;
+
+            padding: 20px;
+
+            min-height: 500px;
+
+            white-space: pre-wrap;
+
+            font-family:
+                Consolas,
+                "Courier New",
+                monospace;
+
+            color: #d1fae5;
+
+            line-height: 1.6;
+        }
+
+
+        /* =====================================================
+           EMPTY STATE
+        ===================================================== */
+
+        .empty {
+
+            color: #64748b;
+
+            padding: 20px 0;
+        }
+
+
+        .preview-empty {
+
+            color: #64748b;
+
+            text-align: center;
+
+            padding-top: 180px;
+
+            min-height: 500px;
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ===================================================== */
+
+        @media (
+            max-width: 900px
+        ) {
+
+            .container {
+
+                grid-template-columns:
+                    1fr;
+            }
+
+            .sidebar {
+
+                border-right: none;
+
+                border-bottom:
+                    1px solid #334155;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     HEADER
+========================================================= -->
+
+<header>
+
+    <h1>🚀 AutoDev Agent</h1>
+
+    <p>
+        AI-powered code generation,
+        execution, self-healing and code management
+    </p>
+
+</header>
+
+
+<!-- =========================================================
+     MAIN CONTAINER
+========================================================= -->
+
+<div class="container">
+
+
+    <!-- =====================================================
+         FILE SIDEBAR
+    ====================================================== -->
+
+    <aside class="sidebar">
+
+        <h2>📁 Generated Files</h2>
+
+        <button onclick="loadFiles()">
+
+            🔄 Refresh Files
+
+        </button>
+
+
+        <div id="files">
+
+            Loading...
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         CODE PREVIEW
+    ====================================================== -->
+
+    <main class="content">
+
+
+        <!-- CLEAR PREVIEW BUTTON -->
+
+        <button
+            class="clear-preview"
+            onclick="clearPreview()"
+        >
+
+            🔄 Clear Preview
+
+        </button>
+
+
+        <!-- STATUS -->
+
+        <div
+            id="status"
+            class="status"
+        >
+
+            Select a generated file to preview it.
+
+        </div>
+
+
+        <!-- CODE TITLE -->
+
+        <h2>
+
+            📄 Code Preview
+
+        </h2>
+
+
+        <!-- CODE -->
+
+        <div class="preview">
+
+            <pre
+                id="preview"
+                class="preview-empty"
+            >No file selected.</pre>
+
+        </div>
+
+
+    </main>
+
+
+</div>
+
+
+<script>
+
+
+// ============================================================
+// LOAD GENERATED FILES
+// ============================================================
+
+async function loadFiles() {
+
+    const container =
+        document.getElementById(
+            "files"
+        );
+
+
+    try {
+
+        container.innerHTML =
+            "Loading...";
+
+
+        const response =
+            await fetch(
+                "/generated-files"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const data =
+            await response.json();
+
+
+        container.innerHTML =
+            "";
+
+
+        if (
+            !data.files ||
+            data.files.length === 0
+        ) {
+
+            container.innerHTML =
+                '<div class="empty">' +
+                'No generated files yet.' +
+                '</div>';
+
+            return;
+
+        }
+
+
+        data.files.forEach(
+            function(file) {
+
+                const wrapper =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                wrapper.className =
+                    "file";
+
+
+                // FILE NAME
+
+                const name =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                name.className =
+                    "file-name";
+
+
+                name.textContent =
+                    "🐍 " +
+                    file.name;
+
+
+                // VIEW BUTTON
+
+                const viewButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                viewButton.textContent =
+                    "👁 View";
+
+
+                viewButton.onclick =
+                    function() {
+
+                        viewFile(
+                            file.name
+                        );
+
+                    };
+
+
+                // DOWNLOAD BUTTON
+
+                const downloadButton =
+                    document.createElement(
+                        "button"
+                    );
+
+
+                downloadButton.textContent =
+                    "⬇ Download";
+
+
+                downloadButton.onclick =
+                    function() {
+
+                        window.location.href =
+                            file.download_url;
+
+                    };
+
+
+                // ADD ELEMENTS
+
+                wrapper.appendChild(
+                    name
+                );
+
+
+                wrapper.appendChild(
+                    viewButton
+                );
+
+
+                wrapper.appendChild(
+                    downloadButton
+                );
+
+
+                container.appendChild(
+                    wrapper
+                );
+
+            }
+        );
+
+    }
+
+
+    catch (error) {
+
+        container.innerHTML =
+            "❌ Failed to load files.";
+
+        console.error(error);
+
+    }
+
+}
+
+
+// ============================================================
+// VIEW GENERATED CODE
+// ============================================================
+
+async function viewFile(
+    filename
+) {
+
+    const preview =
+        document.getElementById(
+            "preview"
+        );
+
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    try {
+
+        status.textContent =
+            "Loading " +
+            filename +
+            "...";
+
+
+        const url =
+            "/view/" +
+            encodeURIComponent(
+                filename
+            );
+
+
+        const response =
+            await fetch(
+                url
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const code =
+            await response.text();
+
+
+        preview.textContent =
+            code;
+
+
+        preview.classList.remove(
+            "preview-empty"
+        );
+
+
+        status.textContent =
+            "Viewing: " +
+            filename;
+
+    }
+
+
+    catch (error) {
+
+        preview.textContent =
+            "❌ Unable to load code.";
+
+
+        preview.classList.add(
+            "preview-empty"
+        );
+
+
+        status.textContent =
+            "Error: " +
+            error.message;
+
+
+        console.error(error);
+
+    }
+
+}
+
+
+// ============================================================
+// CLEAR PREVIEW
+// ============================================================
+
+function clearPreview() {
+
+    const preview =
+        document.getElementById(
+            "preview"
+        );
+
+
+    const status =
+        document.getElementById(
+            "status"
+        );
+
+
+    preview.textContent =
+        "No file selected.";
+
+
+    preview.classList.add(
+        "preview-empty"
+    );
+
+
+    status.textContent =
+        "Select a generated file to preview it.";
+
+}
+
+
+// ============================================================
+// CLEAR PREVIEW WHEN PAGE IS RESTORED
+// ============================================================
+
+window.addEventListener(
+    "pageshow",
+    function() {
+
+        clearPreview();
+
+    }
+);
+
+
+// ============================================================
+// INITIAL LOAD
+// ============================================================
+
+loadFiles();
+
+
+// Make sure preview starts empty
+
+clearPreview();
+
+</script>
+
+
+</body>
+
+</html>
