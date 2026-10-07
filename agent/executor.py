@@ -1,203 +1,411 @@
-import re
+import shutil
 import subprocess
 import sys
+import uuid
+
+from pathlib import Path
 from typing import Optional
 
-from agent.fixer import fix_code
 from agent.logger import log
-from agent.storage import (
-    create_generated_file,
-    update_generated_file,
-)
+
 
 MAX_RETRIES = 3
-EXECUTION_TIMEOUT = 15
+EXECUTION_TIMEOUT = 30
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+PROJECTS_DIR = BASE_DIR / "generated" / "projects"
+
+PROJECTS_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
+)
 
 
-def extract_python_code(text: str) -> Optional[str]:
-    match = re.search(
-        r"```python\s*(.*?)```",
-        text,
-        re.DOTALL | re.IGNORECASE
+def _safe_project_name(name: str) -> str:
+    """
+    Convert an LLM-generated project name into a safe directory name.
+    """
+
+    if not name:
+        return "Generated_Project"
+
+    cleaned = "".join(
+        character
+        if character.isalnum() or character in "_-"
+        else "_"
+        for character in name.strip()
     )
 
-    if match:
-        return match.group(1).strip()
+    cleaned = cleaned.strip("._-")
 
-    return None
+    if not cleaned:
+        cleaned = "Generated_Project"
 
-
-def clean_fixed_code(text: str) -> str:
-    extracted = extract_python_code(text)
-
-    if extracted:
-        return extracted
-
-    text = text.replace("```python", "")
-    text = text.replace("```", "")
-
-    return text.strip()
+    return cleaned[:80]
 
 
-def inject_inputs(code: str, inputs: dict) -> str:
-    if not inputs:
-        return code
+def _create_workspace(project_name: str) -> tuple[str, Path]:
+    """
+    Create a unique workspace for one generated project.
+    """
 
-    lines = [
-        "# AutoDev runtime inputs"
-    ]
+    safe_name = _safe_project_name(project_name)
 
-    for key, value in inputs.items():
-        if not key.isidentifier():
-            continue
+    workspace_id = uuid.uuid4().hex[:8]
 
-        lines.append(
-            f"{key} = {repr(value)}"
+    workspace_name = (
+        f"{safe_name}_{workspace_id}"
+    )
+
+    workspace = PROJECTS_DIR / workspace_name
+
+    workspace.mkdir(
+        parents=True,
+        exist_ok=False,
+    )
+
+    return workspace_name, workspace
+
+
+def _safe_relative_path(path: str) -> Path:
+    """
+    Validate a generated project-relative path.
+    """
+
+    if not isinstance(path, str):
+        raise ValueError(
+            "Project file path must be a string."
         )
 
-    lines.append("")
+    normalized = path.replace("\\", "/").strip()
 
-    return "\n".join(lines) + code
+    if not normalized:
+        raise ValueError(
+            "Project file path cannot be empty."
+        )
+
+    if normalized.startswith("/"):
+        raise ValueError(
+            f"Absolute path is not allowed: {path}"
+        )
+
+    parts = normalized.split("/")
+
+    if ".." in parts:
+        raise ValueError(
+            f"Path traversal detected: {path}"
+        )
+
+    if ":" in parts[0]:
+        raise ValueError(
+            f"Drive path is not allowed: {path}"
+        )
+
+    return Path(*parts)
 
 
-def run_code(file_path: str) -> dict:
+def _write_project_files(
+    workspace: Path,
+    files: list,
+) -> list[str]:
+    """
+    Write all generated project files into the workspace.
+    """
+
+    written_files = []
+
+    for file_info in files:
+
+        relative_path = _safe_relative_path(
+            file_info["path"]
+        )
+
+        content = file_info["content"]
+
+        target = workspace / relative_path
+
+        target.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        target.write_text(
+            content,
+            encoding="utf-8",
+        )
+
+        written_files.append(
+            relative_path.as_posix()
+        )
+
+        log(
+            f"📄 Created: "
+            f"{relative_path.as_posix()}"
+        )
+
+    return written_files
+
+
+def _run_command(
+    command: str,
+    workspace: Path,
+) -> dict:
+
+    if not command:
+        return {
+            "success": True,
+            "stdout": "",
+            "stderr": "",
+            "return_code": 0,
+        }
+
+    log(
+        f"⚙️ Running: {command}"
+    )
+
     try:
-        log("⚙️ Running generated code...")
 
         result = subprocess.run(
-            [sys.executable, file_path],
+            command,
+            cwd=str(workspace),
+            shell=True,
             capture_output=True,
             text=True,
-            timeout=EXECUTION_TIMEOUT
+            timeout=EXECUTION_TIMEOUT,
         )
 
         return {
             "success": result.returncode == 0,
             "stdout": result.stdout,
             "stderr": result.stderr,
-            "return_code": result.returncode
+            "return_code": result.returncode,
         }
 
     except subprocess.TimeoutExpired:
+
         return {
             "success": False,
             "stdout": "",
             "stderr": (
-                f"Execution timed out after "
+                f"Command timed out after "
                 f"{EXECUTION_TIMEOUT} seconds."
             ),
-            "return_code": None
+            "return_code": None,
         }
 
     except Exception as exc:
+
         return {
             "success": False,
             "stdout": "",
             "stderr": str(exc),
-            "return_code": None
+            "return_code": None,
         }
+
+
+def _find_entry_file(spec: dict) -> Optional[str]:
+    """
+    Find a sensible Python entry file.
+    """
+
+    preferred = [
+        "app/main.py",
+        "main.py",
+        "app.py",
+        "src/main.py",
+    ]
+
+    file_paths = {
+        file_info["path"].replace("\\", "/")
+        for file_info in spec.get("files", [])
+    }
+
+    for candidate in preferred:
+
+        if candidate in file_paths:
+            return candidate
+
+    python_files = [
+        path
+        for path in file_paths
+        if path.endswith(".py")
+        and not path.startswith("tests/")
+    ]
+
+    if python_files:
+        return sorted(python_files)[0]
+
+    return None
+
+
+def execute_project(
+    project_spec: dict,
+) -> dict:
+
+    log("🚀 Starting project execution...")
+
+    project_name = project_spec.get(
+        "project_name",
+        "Generated_Project",
+    )
+
+    workspace_name, workspace = _create_workspace(
+        project_name
+    )
+
+    log(
+        f"📁 Workspace created: {workspace_name}"
+    )
+
+    written_files = _write_project_files(
+        workspace,
+        project_spec.get("files", []),
+    )
+
+    run_command = project_spec.get(
+        "run_command",
+        "",
+    )
+
+    test_command = project_spec.get(
+        "test_command",
+        "",
+    )
+
+    result = {
+        "success": False,
+        "workspace_name": workspace_name,
+        "workspace_path": str(workspace),
+        "project_name": project_name,
+        "files": written_files,
+        "run_result": None,
+        "test_result": None,
+    }
+
+    # ------------------------------------------------------------
+    # TESTS
+    # ------------------------------------------------------------
+
+    if test_command:
+
+        log("🧪 Running project tests...")
+
+        test_result = _run_command(
+            test_command,
+            workspace,
+        )
+
+        result["test_result"] = test_result
+
+        if not test_result["success"]:
+
+            log(
+                "❌ Tests failed:\n"
+                + test_result["stderr"]
+            )
+
+            result["error"] = (
+                "Project tests failed."
+            )
+
+            return result
+
+        log("✅ Tests passed.")
+
+    # ------------------------------------------------------------
+    # RUN APPLICATION
+    # ------------------------------------------------------------
+
+    if run_command:
+
+        log("▶️ Running project...")
+
+        run_result = _run_command(
+            run_command,
+            workspace,
+        )
+
+        result["run_result"] = run_result
+
+        if not run_result["success"]:
+
+            log(
+                "❌ Project execution failed:\n"
+                + run_result["stderr"]
+            )
+
+            result["error"] = (
+                "Project execution failed."
+            )
+
+            return result
+
+        log("✅ Project executed successfully.")
+
+    else:
+
+        entry_file = _find_entry_file(
+            project_spec
+        )
+
+        if entry_file:
+
+            log(
+                f"🐍 Running entry file: "
+                f"{entry_file}"
+            )
+
+            run_result = _run_command(
+                f'"{sys.executable}" "{entry_file}"',
+                workspace,
+            )
+
+            result["run_result"] = run_result
+
+            if not run_result["success"]:
+
+                log(
+                    "❌ Entry file failed:\n"
+                    + run_result["stderr"]
+                )
+
+                result["error"] = (
+                    "Project execution failed."
+                )
+
+                return result
+
+            log(
+                "✅ Entry file executed successfully."
+            )
+
+    result["success"] = True
+
+    log(
+        "🎉 Project completed successfully."
+    )
+
+    return result
 
 
 def execute_plan(
-    plan: str,
-    inputs: Optional[dict] = None
+    plan,
+    inputs: Optional[dict] = None,
 ) -> dict:
+    """
+    Backward-compatible entry point.
 
-    log("🚀 Starting execution...")
+    The new planner returns a structured project specification.
+    """
 
-    inputs = inputs or {}
-
-    code = extract_python_code(plan)
-
-    if not code:
-        log("❌ No Python code found.")
+    if not isinstance(plan, dict):
 
         return {
             "success": False,
-            "error": "No Python code found."
+            "error": (
+                "Executor expected a structured "
+                "project specification."
+            ),
         }
 
-    code = inject_inputs(code, inputs)
-
-    filename, file_path = create_generated_file(code)
-
-    log(f"💾 Generated code saved: {file_path}")
-
-    last_result = None
-
-    for attempt in range(1, MAX_RETRIES + 1):
-
-        log(
-            f"🔁 Execution attempt "
-            f"{attempt}/{MAX_RETRIES}"
-        )
-
-        result = run_code(file_path)
-        last_result = result
-
-        if result["success"]:
-            log("✅ Execution successful.")
-
-            return {
-                "success": True,
-                "stdout": result["stdout"],
-                "stderr": result["stderr"],
-                "attempts": attempt,
-                "generated_file": filename,
-                "file_path": file_path
-            }
-
-        log(
-            "❌ Execution error:\n"
-            + result["stderr"]
-        )
-
-        if attempt >= MAX_RETRIES:
-            break
-
-        log("🛠 Attempting automatic repair...")
-
-        fixed_response = fix_code(
-            code,
-            result["stderr"]
-        )
-
-        fixed_code = clean_fixed_code(
-            fixed_response
-        )
-
-        if not fixed_code:
-            log("❌ Fixer returned empty code.")
-            break
-
-        code = fixed_code
-
-        update_generated_file(
-            file_path,
-            code
-        )
-
-        log(
-            "💾 Fixed version saved to "
-            + file_path
-        )
-
-    log("❌ Maximum retries reached.")
-
-    return {
-        "success": False,
-        "error": "Execution failed after retries.",
-        "stdout": (
-            last_result["stdout"]
-            if last_result
-            else ""
-        ),
-        "stderr": (
-            last_result["stderr"]
-            if last_result
-            else ""
-        ),
-        "attempts": MAX_RETRIES,
-        "generated_file": filename,
-        "file_path": file_path
-    }
+    return execute_project(plan)
