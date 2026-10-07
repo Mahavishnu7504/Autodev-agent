@@ -1,854 +1,1368 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AutoDev Agent</title>
 
     <style>
-
         * {
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --panel-2: #1e293b;
+            --code: #020617;
+            --border: #334155;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --blue: #2563eb;
+            --blue-hover: #1d4ed8;
+            --cyan: #38bdf8;
+            --red: #dc2626;
+            --purple: #7c3aed;
+            --green-bg: #14532d;
+            --green-text: #86efac;
+            --red-bg: #7f1d1d;
+            --red-text: #fca5a5;
+            --yellow-bg: #713f12;
+            --yellow-text: #fde68a;
+        }
+
         body {
-
             margin: 0;
-
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
-
-            background: #0f172a;
-
-            color: #e2e8f0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: var(--bg);
+            color: var(--text);
         }
 
         header {
-
-            padding: 24px 32px;
-
-            background: #111827;
-
-            border-bottom:
-                1px solid #334155;
+            padding: 20px 28px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
         }
 
         header h1 {
-
             margin: 0;
-
-            color: #38bdf8;
+            color: var(--cyan);
+            font-size: 25px;
         }
 
         header p {
-
-            margin-top: 8px;
-
-            color: #94a3b8;
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 14px;
         }
 
-        .container {
-
+        .layout {
             display: grid;
-
-            grid-template-columns:
-                360px 1fr;
-
-            min-height:
-                calc(100vh - 105px);
+            grid-template-columns: 320px 1fr;
+            min-height: calc(100vh - 92px);
         }
 
         .sidebar {
-
-            padding: 24px;
-
-            background: #111827;
-
-            border-right:
-                1px solid #334155;
-
+            padding: 18px;
+            background: var(--panel);
+            border-right: 1px solid var(--border);
             overflow-y: auto;
         }
 
-        .content {
-
-            padding: 24px;
-
+        .main {
+            padding: 22px;
+            min-width: 0;
             overflow-y: auto;
+        }
 
-            position: relative;
+        h2 {
+            margin: 0;
+            font-size: 19px;
         }
 
         button {
-
-            border: none;
-
-            padding: 9px 13px;
-
-            margin: 4px;
-
+            border: 0;
             border-radius: 6px;
-
-            cursor: pointer;
-
-            background: #2563eb;
-
+            padding: 8px 11px;
+            background: var(--blue);
             color: white;
-
-            font-size: 14px;
-
-            transition:
-                background 0.2s,
-                transform 0.1s;
+            cursor: pointer;
+            font-size: 13px;
         }
 
         button:hover {
-
-            background: #1d4ed8;
-
-            transform:
-                translateY(-1px);
+            background: var(--blue-hover);
         }
 
-        .clear-preview {
-
-            margin:
-                0 0 18px 0;
-
+        button.secondary {
             background: #475569;
-
-            font-weight: 600;
         }
 
-        .clear-preview:hover {
-
+        button.secondary:hover {
             background: #64748b;
         }
 
-        .file {
-
-            margin-top: 12px;
-
-            padding: 14px;
-
-            background: #1e293b;
-
-            border:
-                1px solid #334155;
-
-            border-radius: 8px;
+        button.danger {
+            background: var(--red);
         }
 
-        .file-name {
-
-            font-weight: bold;
-
-            margin-bottom: 8px;
-
-            word-break: break-all;
-        }
-
-        .file-actions {
-
-            display: flex;
-
-            flex-wrap: wrap;
-
-            gap: 4px;
-        }
-
-        .delete-button {
-
-            background: #dc2626;
-        }
-
-        .delete-button:hover {
-
+        button.danger:hover {
             background: #b91c1c;
         }
 
-        .status {
-
-            padding: 14px;
-
-            margin-bottom: 20px;
-
-            background: #1e293b;
-
-            border-radius: 8px;
-
-            color: #94a3b8;
+        button.zip {
+            background: var(--purple);
         }
 
-        .preview {
-
-            background: #020617;
-
-            border:
-                1px solid #334155;
-
-            border-radius: 8px;
-
-            overflow: auto;
+        button.zip:hover {
+            background: #6d28d9;
         }
 
-        pre {
+        .section {
+            margin-bottom: 26px;
+        }
 
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .count {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .card {
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 13px;
+            margin-bottom: 10px;
+        }
+
+        .card:hover {
+            border-color: #475569;
+        }
+
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            word-break: break-word;
+        }
+
+        .card-meta {
+            color: var(--muted);
+            font-size: 12px;
+            margin-bottom: 9px;
+            line-height: 1.5;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .actions button {
             margin: 0;
-
-            padding: 20px;
-
-            min-height: 500px;
-
-            white-space: pre-wrap;
-
-            font-family:
-                Consolas,
-                "Courier New",
-                monospace;
-
-            color: #d1fae5;
-
-            line-height: 1.6;
         }
 
-        .empty {
-
-            color: #64748b;
-
-            padding: 20px 0;
-        }
-
-        .preview-empty {
-
-            color: #64748b;
-
-            text-align: center;
-
-            padding-top: 180px;
-
-            min-height: 500px;
-        }
-
-        .file-count {
-
-            color: #94a3b8;
-
-            margin-bottom: 12px;
-
+        .status {
+            padding: 13px;
+            margin-bottom: 18px;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--muted);
             font-size: 14px;
         }
 
-        @media (
-            max-width: 900px
-        ) {
+        .status.error {
+            border-color: #991b1b;
+            color: var(--red-text);
+        }
 
-            .container {
+        .overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
 
-                grid-template-columns:
-                    1fr;
+        .stat {
+            padding: 12px;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            margin-top: 5px;
+            font-size: 19px;
+            font-weight: bold;
+        }
+
+        .project-view {
+            display: none;
+        }
+
+        .project-view.active {
+            display: block;
+        }
+
+        .project-header {
+            padding: 17px;
+            margin-bottom: 15px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+        }
+
+        .project-header h2 {
+            color: var(--cyan);
+            margin-bottom: 7px;
+        }
+
+        .project-header p {
+            color: var(--muted);
+            margin: 4px 0;
+            font-size: 13px;
+        }
+
+        .badges {
+            margin-top: 11px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            margin-right: 4px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge.green {
+            background: var(--green-bg);
+            color: var(--green-text);
+        }
+
+        .badge.red {
+            background: var(--red-bg);
+            color: var(--red-text);
+        }
+
+        .badge.yellow {
+            background: var(--yellow-bg);
+            color: var(--yellow-text);
+        }
+
+        .badge.blue {
+            background: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        .project-actions {
+            display: flex;
+            gap: 7px;
+            flex-wrap: wrap;
+            margin: 14px 0;
+        }
+
+        .file-viewer {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 12px;
+            min-height: 500px;
+        }
+
+        .file-list {
+            padding: 8px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            padding: 9px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            color: #cbd5e1;
+            font-size: 13px;
+            cursor: pointer;
+            word-break: break-word;
+        }
+
+        .file-item:hover {
+            background: var(--panel-2);
+        }
+
+        .file-item.active {
+            background: var(--blue);
+            color: white;
+        }
+
+        .code {
+            background: var(--code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: auto;
+        }
+
+        .code-title {
+            padding: 11px 14px;
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            color: var(--cyan);
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        pre {
+            margin: 0;
+            padding: 16px;
+            min-height: 450px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            color: #d1fae5;
+            font: 13px/1.55 Consolas, "Courier New", monospace;
+        }
+
+        .repair {
+            border-left: 3px solid #eab308;
+            padding: 9px 12px;
+            margin-bottom: 7px;
+            background: var(--panel-2);
+            border-radius: 0 6px 6px 0;
+        }
+
+        .repair pre {
+            min-height: auto;
+            margin-top: 7px;
+            padding: 8px;
+            font-size: 11px;
+            background: var(--code);
+            border-radius: 5px;
+        }
+
+        .legacy {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        .empty,
+        .loading {
+            padding: 14px 4px;
+            color: var(--muted);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .back {
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 1000px) {
+            .layout {
+                grid-template-columns: 270px 1fr;
             }
 
-            .sidebar {
+            .file-viewer {
+                grid-template-columns: 210px 1fr;
+            }
 
-                border-right: none;
-
-                border-bottom:
-                    1px solid #334155;
+            .overview {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
+        @media (max-width: 760px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .file-viewer {
+                grid-template-columns: 1fr;
+            }
+
+            .file-list {
+                max-height: 200px;
+            }
+        }
     </style>
-
 </head>
-
 
 <body>
 
-
 <header>
-
     <h1>🚀 AutoDev Agent</h1>
-
-    <p>
-        AI-powered code generation,
-        execution, self-healing and code management
-    </p>
-
+    <p>Autonomous AI software engineer — generate, test, execute and self-heal.</p>
 </header>
 
+<div class="layout">
 
-<div class="container">
-
-
-    <!-- =====================================================
-         FILE SIDEBAR
-    ====================================================== -->
-
+    <!-- SIDEBAR -->
     <aside class="sidebar">
 
-        <h2>📁 Generated Files</h2>
+        <section class="section">
+            <div class="section-header">
+                <h2>📦 Projects</h2>
+                <button class="secondary" onclick="loadProjects()">↻</button>
+            </div>
 
-        <button
-            onclick="loadFiles()"
-        >
-            🔄 Refresh Files
-        </button>
+            <div id="project-count" class="count">
+                Loading...
+            </div>
 
-        <div
-            id="file-count"
-            class="file-count"
-        >
-            Loading files...
-        </div>
+            <div id="projects">
+                <div class="loading">Loading projects...</div>
+            </div>
+        </section>
 
-        <div id="files">
+        <section class="section">
+            <div class="section-header">
+                <h2>📁 Generated Files</h2>
+                <button class="secondary" onclick="loadFiles()">↻</button>
+            </div>
 
-            Loading...
+            <div id="file-count" class="count">
+                Loading...
+            </div>
 
-        </div>
+            <div id="files" class="legacy">
+                <div class="loading">Loading files...</div>
+            </div>
+        </section>
 
     </aside>
 
 
-    <!-- =====================================================
-         CODE PREVIEW
-    ====================================================== -->
+    <!-- MAIN -->
+    <main class="main">
 
-    <main class="content">
+        <!-- PROJECT HOME -->
+        <div id="home-view">
 
+            <div class="status">
+                <strong>🤖 AutoDev Agent</strong><br><br>
+                Select a project to inspect its files, tests, repairs and ZIP package.
+            </div>
 
-        <!-- CLEAR PREVIEW -->
+            <h2>📦 Generated Projects</h2>
 
-        <button
-            class="clear-preview"
-            onclick="clearPreview()"
-        >
-            🔄 Clear Preview
-        </button>
-
-
-        <!-- STATUS -->
-
-        <div
-            id="status"
-            class="status"
-        >
-            Select a generated file to preview it.
-        </div>
-
-
-        <!-- CODE TITLE -->
-
-        <h2>
-            📄 Code Preview
-        </h2>
-
-
-        <!-- CODE -->
-
-        <div class="preview">
-
-            <pre
-                id="preview"
-                class="preview-empty"
-            >No file selected.</pre>
+            <div id="overview" style="margin-top:14px;">
+                <div class="empty">No projects yet.</div>
+            </div>
 
         </div>
 
+
+        <!-- PROJECT DETAILS -->
+        <div id="project-view" class="project-view">
+
+            <button class="secondary back" onclick="showHome()">
+                ← Back
+            </button>
+
+            <div id="project-detail">
+                <div class="loading">Loading project...</div>
+            </div>
+
+        </div>
 
     </main>
-
 
 </div>
 
 
 <script>
+    let currentProject = null;
 
 
-// ============================================================
-// CURRENTLY SELECTED FILE
-// ============================================================
+    // ------------------------------------------------------------
+    // HELPERS
+    // ------------------------------------------------------------
 
-let selectedFile = null;
+    function escapeHtml(value) {
+        return String(value ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
 
 
-// ============================================================
-// LOAD GENERATED FILES
-// ============================================================
-
-async function loadFiles() {
-
-    const container =
-        document.getElementById(
-            "files"
+    function projectName(project) {
+        return (
+            project.display_name ||
+            project.project_name ||
+            project.name ||
+            "Unnamed Project"
         );
+    }
 
-    const count =
-        document.getElementById(
-            "file-count"
-        );
 
-    try {
-
-        container.innerHTML =
-            "Loading...";
-
-        const response =
-            await fetch(
-                "/generated-files"
-            );
-
-        if (!response.ok) {
-
-            throw new Error(
-                "HTTP " +
-                response.status
-            );
+    function testStatus(result) {
+        if (!result) {
+            return {
+                text: "NO TEST RESULT",
+                className: "yellow"
+            };
         }
 
-        const data =
-            await response.json();
+        const passed =
+            result.success === true ||
+            result.passed === true ||
+            result.status === "passed";
 
-        container.innerHTML = "";
+        return passed
+            ? {
+                text: "TESTS PASSED",
+                className: "green"
+            }
+            : {
+                text: "TESTS FAILED",
+                className: "red"
+            };
+    }
 
-        count.textContent =
-            `${data.count || 0} generated file(s)`;
+
+    // ------------------------------------------------------------
+    // PROJECTS
+    // ------------------------------------------------------------
+
+    async function loadProjects() {
+        const list = document.getElementById("projects");
+        const count = document.getElementById("project-count");
+
+        try {
+            list.innerHTML =
+                '<div class="loading">Loading...</div>';
+
+            const response = await fetch("/projects");
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            const projects =
+                Array.isArray(data)
+                    ? data
+                    : data.projects || [];
+
+            count.textContent =
+                `${projects.length} project(s)`;
+
+            list.innerHTML = "";
+
+            if (!projects.length) {
+                list.innerHTML =
+                    '<div class="empty">No projects yet.</div>';
+
+                renderOverview([]);
+                return;
+            }
+
+            renderOverview(projects);
+
+            projects.forEach(project => {
+                const name = projectName(project);
+
+                const workspace =
+                    project.workspace_name ||
+                    project.name ||
+                    "";
+
+                const files =
+                    project.file_count ??
+                    (
+                        Array.isArray(project.files)
+                            ? project.files.length
+                            : 0
+                    );
+
+                const card =
+                    document.createElement("div");
+
+                card.className = "card";
+
+                card.innerHTML = `
+                    <div class="card-title">
+                        📦 ${escapeHtml(name)}
+                    </div>
+
+                    <div class="card-meta">
+                        ${files} file(s)
+                    </div>
+
+                    <div class="actions">
+                        <button onclick="openProject('${encodeURIComponent(workspace)}')">
+                            Open
+                        </button>
+
+                        <button
+                            class="zip"
+                            onclick="downloadProject('${encodeURIComponent(workspace)}')"
+                        >
+                            ZIP
+                        </button>
+
+                        <button
+                            class="danger"
+                            onclick="deleteProject('${encodeURIComponent(workspace)}')"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                `;
+
+                list.appendChild(card);
+            });
+
+        } catch (error) {
+            list.innerHTML =
+                '<div class="empty">❌ Failed to load projects.</div>';
+
+            count.textContent = "Unable to load.";
+
+            console.error(error);
+        }
+    }
 
 
-        if (
-            !data.files ||
-            data.files.length === 0
-        ) {
+    function renderOverview(projects) {
+        const container =
+            document.getElementById("overview");
 
+        if (!projects.length) {
             container.innerHTML =
-                '<div class="empty">' +
-                'No generated files yet.' +
-                '</div>';
+                '<div class="empty">No generated projects yet.</div>';
 
             return;
         }
 
+        const fileCount =
+            projects.reduce(
+                (total, project) =>
+                    total +
+                    (
+                        project.file_count ||
+                        (
+                            Array.isArray(project.files)
+                                ? project.files.length
+                                : 0
+                        )
+                    ),
+                0
+            );
 
-        data.files.forEach(
-            function(file) {
+        container.innerHTML = `
+            <div class="overview">
 
-                // ------------------------------------------------
-                // CARD
-                // ------------------------------------------------
+                <div class="stat">
+                    <div class="stat-label">Projects</div>
+                    <div class="stat-value">${projects.length}</div>
+                </div>
 
-                const wrapper =
-                    document.createElement(
-                        "div"
-                    );
+                <div class="stat">
+                    <div class="stat-label">Files</div>
+                    <div class="stat-value">${fileCount}</div>
+                </div>
 
-                wrapper.className =
-                    "file";
+                <div class="stat">
+                    <div class="stat-label">Packages</div>
+                    <div class="stat-value">${projects.length}</div>
+                </div>
 
+                <div class="stat">
+                    <div class="stat-label">Agent</div>
+                    <div class="stat-value">🤖</div>
+                </div>
 
-                // ------------------------------------------------
-                // FILE NAME
-                // ------------------------------------------------
-
-                const name =
-                    document.createElement(
-                        "div"
-                    );
-
-                name.className =
-                    "file-name";
-
-                name.textContent =
-                    "🐍 " +
-                    file.name;
-
-
-                // ------------------------------------------------
-                // ACTION CONTAINER
-                // ------------------------------------------------
-
-                const actions =
-                    document.createElement(
-                        "div"
-                    );
-
-                actions.className =
-                    "file-actions";
-
-
-                // ------------------------------------------------
-                // VIEW BUTTON
-                // ------------------------------------------------
-
-                const viewButton =
-                    document.createElement(
-                        "button"
-                    );
-
-                viewButton.textContent =
-                    "👁 View";
-
-                viewButton.onclick =
-                    function() {
-
-                        viewFile(
-                            file.name
-                        );
-
-                    };
-
-
-                // ------------------------------------------------
-                // DOWNLOAD BUTTON
-                // ------------------------------------------------
-
-                const downloadButton =
-                    document.createElement(
-                        "button"
-                    );
-
-                downloadButton.textContent =
-                    "⬇ Download";
-
-                downloadButton.onclick =
-                    function() {
-
-                        window.location.href =
-                            file.download_url;
-
-                    };
-
-
-                // ------------------------------------------------
-                // DELETE BUTTON
-                // ------------------------------------------------
-
-                const deleteButton =
-                    document.createElement(
-                        "button"
-                    );
-
-                deleteButton.textContent =
-                    "🗑 Delete";
-
-                deleteButton.className =
-                    "delete-button";
-
-                deleteButton.onclick =
-                    function() {
-
-                        deleteFile(
-                            file.name
-                        );
-
-                    };
-
-
-                // ------------------------------------------------
-                // ADD BUTTONS
-                // ------------------------------------------------
-
-                actions.appendChild(
-                    viewButton
-                );
-
-                actions.appendChild(
-                    downloadButton
-                );
-
-                actions.appendChild(
-                    deleteButton
-                );
-
-
-                wrapper.appendChild(
-                    name
-                );
-
-                wrapper.appendChild(
-                    actions
-                );
-
-                container.appendChild(
-                    wrapper
-                );
-
-            }
-        );
-
+            </div>
+        `;
     }
 
-    catch (error) {
+
+    // ------------------------------------------------------------
+    // OPEN PROJECT
+    // ------------------------------------------------------------
+
+    async function openProject(encodedWorkspace) {
+        const workspace =
+            decodeURIComponent(encodedWorkspace);
+
+        currentProject = workspace;
+
+        document.getElementById("home-view").style.display =
+            "none";
+
+        document.getElementById("project-view")
+            .classList.add("active");
+
+        const container =
+            document.getElementById("project-detail");
 
         container.innerHTML =
-            "❌ Failed to load files.";
+            '<div class="loading">Loading project...</div>';
 
-        count.textContent =
-            "Unable to load file count.";
+        try {
+            const response =
+                await fetch(
+                    `/projects/${encodeURIComponent(workspace)}`
+                );
 
-        console.error(error);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
+            const project =
+                await response.json();
+
+            renderProject(project);
+
+        } catch (error) {
+            container.innerHTML = `
+                <div class="status error">
+                    ❌ ${escapeHtml(error.message)}
+                </div>
+            `;
+
+            console.error(error);
+        }
     }
 
-}
+
+    // ------------------------------------------------------------
+    // PROJECT DETAILS
+    // ------------------------------------------------------------
+
+    function renderProject(project) {
+        const container =
+            document.getElementById("project-detail");
+
+        const name = projectName(project);
+
+        const files =
+            Array.isArray(project.files)
+                ? project.files
+                : [];
+
+        const tests =
+            project.test_result ||
+            project.result?.test_result ||
+            null;
+
+        const repairs =
+            project.repair_attempts ??
+            project.result?.repair_attempts ??
+            0;
+
+        const history =
+            project.repair_history ||
+            project.result?.repair_history ||
+            [];
+
+        const status =
+            testStatus(tests);
+
+        const workspace =
+            project.workspace_name ||
+            currentProject;
+
+        const fileItems =
+            files.length
+                ? files.map(file => {
+
+                    const path =
+                        typeof file === "string"
+                            ? file
+                            : file.path;
+
+                    return `
+                        <div
+                            class="file-item"
+                            data-file="${escapeHtml(path)}"
+                            onclick="viewFile('${encodeURIComponent(path)}')"
+                        >
+                            📄 ${escapeHtml(path)}
+                        </div>
+                    `;
+
+                }).join("")
+                : '<div class="empty">No files.</div>';
 
 
-// ============================================================
-// VIEW GENERATED CODE
-// ============================================================
+        const repairItems =
+            history.length
+                ? history.map((item, index) => {
 
-async function viewFile(
-    filename
-) {
+                    const message =
+                        item.error ||
+                        item.failure ||
+                        item.message ||
+                        JSON.stringify(item, null, 2);
 
-    const preview =
-        document.getElementById(
-            "preview"
-        );
+                    return `
+                        <div class="repair">
+                            <strong>
+                                🔧 Repair Attempt ${index + 1}
+                            </strong>
 
-    const status =
-        document.getElementById(
-            "status"
-        );
+                            <pre>${escapeHtml(message)}</pre>
+                        </div>
+                    `;
 
-
-    try {
-
-        status.textContent =
-            "Loading " +
-            filename +
-            "...";
+                }).join("")
+                : '<div class="empty">No repairs required.</div>';
 
 
-        const url =
-            "/view/" +
-            encodeURIComponent(
-                filename
-            );
+        const testOutput =
+            tests
+                ? (
+                    tests.output ||
+                    tests.stdout ||
+                    tests.message ||
+                    "Test execution completed."
+                )
+                : "";
 
 
-        const response =
-            await fetch(
-                url
-            );
+        container.innerHTML = `
+            <div class="project-header">
+
+                <h2>📦 ${escapeHtml(name)}</h2>
+
+                <p>
+                    Workspace:
+                    ${escapeHtml(workspace)}
+                </p>
+
+                <p>
+                    ${escapeHtml(
+                        project.summary ||
+                        project.description ||
+                        "Autonomously generated project."
+                    )}
+                </p>
+
+                <div class="badges">
+
+                    <span class="badge ${status.className}">
+                        ${status.text}
+                    </span>
+
+                    <span class="badge blue">
+                        ${files.length} FILES
+                    </span>
+
+                    <span class="badge ${
+                        repairs
+                            ? "yellow"
+                            : "green"
+                    }">
+                        ${repairs} REPAIRS
+                    </span>
+
+                </div>
+
+                <div class="project-actions">
+
+                    <button
+                        class="zip"
+                        onclick="downloadProject('${encodeURIComponent(workspace)}')"
+                    >
+                        📦 Download ZIP
+                    </button>
+
+                    <button
+                        class="danger"
+                        onclick="deleteProject('${encodeURIComponent(workspace)}')"
+                    >
+                        🗑 Delete Project
+                    </button>
+
+                </div>
+
+                <div class="overview">
+
+                    <div class="stat">
+                        <div class="stat-label">Files</div>
+                        <div class="stat-value">${files.length}</div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-label">Tests</div>
+                        <div class="stat-value">
+                            ${
+                                tests
+                                    ? (
+                                        tests.success === true ||
+                                        tests.passed === true
+                                            ? "PASS"
+                                            : "FAIL"
+                                    )
+                                    : "N/A"
+                            }
+                        </div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-label">Repairs</div>
+                        <div class="stat-value">${repairs}</div>
+                    </div>
+
+                    <div class="stat">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value">
+                            ${
+                                tests &&
+                                (
+                                    tests.success === true ||
+                                    tests.passed === true
+                                )
+                                    ? "✅"
+                                    : "🤖"
+                            }
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
 
 
-        if (!response.ok) {
+            ${
+                tests
+                    ? `
+                        <div class="card">
+                            <div class="card-title">
+                                🧪 Test Result
+                            </div>
 
-            throw new Error(
-                "HTTP " +
-                response.status
+                            <div class="card-meta">
+                                ${escapeHtml(testOutput)}
+                            </div>
+                        </div>
+                    `
+                    : ""
+            }
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    📂 Project Files
+                </div>
+
+                <div class="file-viewer">
+
+                    <div class="file-list">
+                        ${fileItems}
+                    </div>
+
+                    <div class="code">
+
+                        <div
+                            id="code-title"
+                            class="code-title"
+                        >
+                            Select a file
+                        </div>
+
+                        <pre id="code">
+Select a project file to preview its contents.
+                        </pre>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    🔧 Repair History
+                </div>
+
+                ${repairItems}
+
+            </div>
+        `;
+
+
+        if (files.length) {
+            const first =
+                typeof files[0] === "string"
+                    ? files[0]
+                    : files[0].path;
+
+            viewFile(
+                encodeURIComponent(first)
             );
         }
+    }
 
+
+    // ------------------------------------------------------------
+    // VIEW PROJECT FILE
+    // ------------------------------------------------------------
+
+    async function viewFile(encodedPath) {
+        const path =
+            decodeURIComponent(encodedPath);
+
+        if (!currentProject) {
+            return;
+        }
 
         const code =
-            await response.text();
+            document.getElementById("code");
 
+        const title =
+            document.getElementById("code-title");
 
-        preview.textContent =
-            code;
+        title.textContent =
+            `Loading: ${path}`;
 
+        code.textContent =
+            "Loading...";
 
-        preview.classList.remove(
-            "preview-empty"
-        );
+        try {
+            const url =
+                `/projects/${encodeURIComponent(currentProject)}/file/` +
+                path
+                    .split("/")
+                    .map(encodeURIComponent)
+                    .join("/");
 
+            const response =
+                await fetch(url);
 
-        selectedFile =
-            filename;
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
+            code.textContent =
+                await response.text();
 
-        status.textContent =
-            "Viewing: " +
-            filename;
+            title.textContent =
+                `📄 ${path}`;
 
-    }
+            document
+                .querySelectorAll(".file-item")
+                .forEach(item => {
+                    item.classList.toggle(
+                        "active",
+                        item.dataset.file === path
+                    );
+                });
 
-    catch (error) {
+        } catch (error) {
+            title.textContent = "❌ Error";
 
-        preview.textContent =
-            "❌ Unable to load code.";
-
-        preview.classList.add(
-            "preview-empty"
-        );
-
-        status.textContent =
-            "Error: " +
-            error.message;
-
-        console.error(error);
-
-    }
-
-}
-
-
-// ============================================================
-// DELETE GENERATED FILE
-// ============================================================
-
-async function deleteFile(
-    filename
-) {
-
-    const confirmed =
-        window.confirm(
-            `Are you sure you want to delete "${filename}"?`
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    try {
-
-        const response =
-            await fetch(
-                "/generated-files/" +
-                encodeURIComponent(
-                    filename
-                ),
-                {
-                    method: "DELETE"
-                }
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                data.detail ||
-                "Failed to delete file."
-            );
-
+            code.textContent =
+                `Unable to load file.\n\n${error.message}`;
         }
+    }
 
 
-        // ----------------------------------------------------
-        // CLEAR PREVIEW IF DELETED FILE WAS OPEN
-        // ----------------------------------------------------
+    // ------------------------------------------------------------
+    // DOWNLOAD
+    // ------------------------------------------------------------
+
+    function downloadProject(encodedWorkspace) {
+        const workspace =
+            decodeURIComponent(encodedWorkspace);
+
+        window.location.href =
+            `/download-project/${encodeURIComponent(workspace)}`;
+    }
+
+
+    // ------------------------------------------------------------
+    // DELETE PROJECT
+    // ------------------------------------------------------------
+
+    async function deleteProject(encodedWorkspace) {
+        const workspace =
+            decodeURIComponent(encodedWorkspace);
 
         if (
-            selectedFile === filename
+            !confirm(
+                `Delete "${workspace}"?\n\nThe project and ZIP package will be removed.`
+            )
         ) {
-
-            clearPreview();
-
+            return;
         }
 
+        try {
+            const response =
+                await fetch(
+                    `/projects/${encodeURIComponent(workspace)}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
 
-        // ----------------------------------------------------
-        // REFRESH FILE LIST
-        // ----------------------------------------------------
+            let data = {};
 
-        await loadFiles();
+            try {
+                data = await response.json();
+            } catch (_) {}
 
+            if (!response.ok) {
+                throw new Error(
+                    data.detail ||
+                    "Failed to delete project."
+                );
+            }
 
-        console.log(
-            "Deleted:",
-            filename
-        );
+            if (currentProject === workspace) {
+                showHome();
+            }
 
+            await loadProjects();
+
+            alert("✅ Project deleted.");
+
+        } catch (error) {
+            alert(
+                `❌ Delete failed: ${error.message}`
+            );
+        }
     }
 
-    catch (error) {
 
-        alert(
-            "❌ Delete failed: " +
-            error.message
-        );
+    // ------------------------------------------------------------
+    // HOME
+    // ------------------------------------------------------------
 
-        console.error(error);
+    function showHome() {
+        currentProject = null;
 
+        document.getElementById("home-view")
+            .style.display = "block";
+
+        document.getElementById("project-view")
+            .classList.remove("active");
     }
 
-}
 
+    // ------------------------------------------------------------
+    // LEGACY GENERATED FILES
+    // ------------------------------------------------------------
 
-// ============================================================
-// CLEAR PREVIEW
-// ============================================================
+    async function loadFiles() {
+        const container =
+            document.getElementById("files");
 
-function clearPreview() {
+        const count =
+            document.getElementById("file-count");
 
-    const preview =
-        document.getElementById(
-            "preview"
-        );
+        try {
+            container.innerHTML =
+                '<div class="loading">Loading...</div>';
 
-    const status =
-        document.getElementById(
-            "status"
-        );
+            const response =
+                await fetch("/generated-files");
 
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
 
-    preview.textContent =
-        "No file selected.";
+            const data =
+                await response.json();
 
+            const files =
+                data.files || [];
 
-    preview.classList.add(
-        "preview-empty"
-    );
+            count.textContent =
+                `${files.length} file(s)`;
 
+            container.innerHTML = "";
 
-    status.textContent =
-        "Select a generated file to preview it.";
+            if (!files.length) {
+                container.innerHTML =
+                    '<div class="empty">No generated files.</div>';
 
+                return;
+            }
 
-    selectedFile =
-        null;
+            files.forEach(file => {
+                const card =
+                    document.createElement("div");
 
-}
+                card.className = "card";
 
+                card.innerHTML = `
+                    <div class="card-title">
+                        🐍 ${escapeHtml(file.name)}
+                    </div>
 
-// ============================================================
-// CLEAR PREVIEW WHEN PAGE IS RESTORED
-// ============================================================
+                    <div class="actions">
 
-window.addEventListener(
-    "pageshow",
-    function() {
+                        <button
+                            onclick="viewLegacyFile('${encodeURIComponent(file.name)}')"
+                        >
+                            View
+                        </button>
 
-        clearPreview();
+                        <button
+                            onclick="window.location.href='${file.download_url}'"
+                        >
+                            Download
+                        </button>
 
+                        <button
+                            class="danger"
+                            onclick="deleteLegacyFile('${encodeURIComponent(file.name)}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+        } catch (error) {
+            container.innerHTML =
+                '<div class="empty">❌ Failed to load.</div>';
+
+            count.textContent =
+                "Unable to load.";
+
+            console.error(error);
+        }
     }
-);
 
 
-// ============================================================
-// INITIAL LOAD
-// ============================================================
+    async function viewLegacyFile(encodedName) {
+        const filename =
+            decodeURIComponent(encodedName);
 
-loadFiles();
+        try {
+            const response =
+                await fetch(
+                    `/view/${encodeURIComponent(filename)}`
+                );
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const code =
+                await response.text();
+
+            showHome();
+
+            document.getElementById("overview")
+                .innerHTML = `
+                    <div class="card">
+
+                        <div class="card-title">
+                            📄 ${escapeHtml(filename)}
+                        </div>
+
+                        <div class="code">
+                            <div class="code-title">
+                                Generated File
+                            </div>
+
+                            <pre>${escapeHtml(code)}</pre>
+                        </div>
+
+                    </div>
+                `;
+
+        } catch (error) {
+            alert(
+                `❌ Unable to load file: ${error.message}`
+            );
+        }
+    }
 
 
-// Make sure preview starts empty
+    async function deleteLegacyFile(encodedName) {
+        const filename =
+            decodeURIComponent(encodedName);
 
-clearPreview();
+        if (
+            !confirm(
+                `Delete "${filename}"?`
+            )
+        ) {
+            return;
+        }
+
+        try {
+            const response =
+                await fetch(
+                    `/generated-files/${encodeURIComponent(filename)}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+            let data = {};
+
+            try {
+                data = await response.json();
+            } catch (_) {}
+
+            if (!response.ok) {
+                throw new Error(
+                    data.detail ||
+                    "Failed to delete file."
+                );
+            }
+
+            await loadFiles();
+
+            alert("✅ File deleted.");
+
+        } catch (error) {
+            alert(
+                `❌ Delete failed: ${error.message}`
+            );
+        }
+    }
 
 
+    // ------------------------------------------------------------
+    // INITIAL LOAD
+    // ------------------------------------------------------------
+
+    async function init() {
+        await Promise.all([
+            loadProjects(),
+            loadFiles()
+        ]);
+    }
+
+    init();
 </script>
 
-
 </body>
-
 </html>
