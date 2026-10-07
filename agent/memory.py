@@ -1,500 +1,319 @@
-"""
-AutoDev Agent - Persistent Experience Memory
-
-Stores successful AutoDev experiences so future tasks can benefit from
-previous plans, execution results, and repair history.
-"""
+from __future__ import annotations
 
 import json
 import uuid
-from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List
-
-from chromadb import Client
-from chromadb.config import Settings
-
-from agent.logger import log
+from typing import Any
 
 
-# ============================================================
-# PATHS
-# ============================================================
+import chromadb
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEMORY_DIR = BASE_DIR / "memory"
 
-MEMORY_DIR.mkdir(parents=True, exist_ok=True)
-
-
-# ============================================================
-# CHROMA
-# ============================================================
-
-client = Client(
-    Settings(
-        persist_directory=str(MEMORY_DIR)
-    )
+MEMORY_DIR.mkdir(
+    parents=True,
+    exist_ok=True,
 )
 
-collection = client.get_or_create_collection(
-    name="autodev"
+_client = chromadb.PersistentClient(
+    path=str(MEMORY_DIR)
+)
+
+_collection = _client.get_or_create_collection(
+    name="autodev_experiences",
+    metadata={
+        "description": (
+            "Successful AutoDev engineering experiences"
+        )
+    },
 )
 
 
-# ============================================================
-# HELPERS
-# ============================================================
+MAX_TASK_CHARS = 1000
+MAX_SUMMARY_CHARS = 1500
+MAX_LESSONS = 10
+MAX_REPAIR_HISTORY = 10
 
-def _safe_int(value: Any, default: int = 0) -> int:
+
+def _safe_json(value: Any) -> str:
     try:
-        return int(value)
-    except (TypeError, ValueError):
-        return default
+        return json.dumps(
+            value,
+            ensure_ascii=False,
+            indent=2,
+            default=str,
+        )
+    except Exception:
+        return str(value)
 
 
-def _compact_plan(plan: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Store useful planning information without storing complete
-    source-code contents inside memory.
-    """
+def _clean_list(
+    value: Any,
+    limit: int,
+) -> list[str]:
+    if not isinstance(value, list):
+        return []
 
-    if not isinstance(plan, dict):
-        return {}
+    result = []
 
-    files = []
+    for item in value:
+        text = str(item).strip()
 
-    for item in plan.get("files", []):
-        if not isinstance(item, dict):
-            continue
+        if text:
+            result.append(text[:1000])
 
-        path = str(item.get("path", "")).strip()
+        if len(result) >= limit:
+            break
 
-        if path:
-            files.append(path)
-
-    return {
-        "project_name": str(
-            plan.get("project_name", "")
-        ).strip(),
-
-        "summary": str(
-            plan.get("summary", "")
-        ).strip(),
-
-        "language": str(
-            plan.get("language", "")
-        ).strip(),
-
-        "run_command": str(
-            plan.get("run_command", "")
-        ).strip(),
-
-        "test_command": str(
-            plan.get("test_command", "")
-        ).strip(),
-
-        "files": files,
-    }
+    return result
 
 
-def _compact_result(result: Any) -> Dict[str, Any]:
-    """
-    Extract only useful execution information.
-
-    Avoid storing huge logs, source code, or generated artifacts.
-    """
-
-    if not isinstance(result, dict):
-        return {
-            "success": False,
-            "repair_attempts": 0,
-        }
+def _build_lessons(
+    result: dict[str, Any],
+) -> list[str]:
+    lessons = _clean_list(
+        result.get("lessons", []),
+        MAX_LESSONS,
+    )
 
     repair_history = result.get(
         "repair_history",
-        []
+        [],
     )
 
-    compact_repairs = []
-
     if isinstance(repair_history, list):
-        for repair in repair_history:
-            if not isinstance(repair, dict):
+        for item in repair_history[:MAX_REPAIR_HISTORY]:
+            if not isinstance(item, dict):
                 continue
 
-            changed_files = repair.get(
-                "files_changed",
-                repair.get("changed_files", [])
-            )
+            summary = str(
+                item.get("summary", "")
+            ).strip()
 
-            if not isinstance(changed_files, list):
-                changed_files = []
+            if summary:
+                lessons.append(
+                    f"Repair ({item.get('phase', 'unknown')}): "
+                    f"{summary}"
+                )
 
-            compact_repairs.append({
-                "attempt": repair.get("attempt"),
-                "phase": repair.get("phase"),
-                "success": repair.get("success"),
-                "files_changed": [
-                    str(path)
-                    for path in changed_files
-                ],
-            })
+            if len(lessons) >= MAX_LESSONS:
+                break
 
-    return {
-        "success": bool(
-            result.get("success", False)
-        ),
+    return lessons[:MAX_LESSONS]
 
-        "repair_attempts": _safe_int(
-            result.get("repair_attempts", 0)
-        ),
-
-        "repair_history": compact_repairs,
-
-        "test_passed": bool(
-            result.get("test_passed", False)
-        ),
-
-        "application_passed": bool(
-            result.get("application_passed", False)
-        ),
-    }
-
-
-# ============================================================
-# SAVE MEMORY
-# ============================================================
 
 def save_memory(
     task: str,
-    plan: Dict[str, Any],
-    result: Dict[str, Any] | None = None,
+    plan: dict[str, Any],
+    result: dict[str, Any],
 ) -> str | None:
     """
-    Save one completed AutoDev experience.
-
-    Returns:
-        Memory ID on success.
-        None if memory storage fails.
-
-    Memory is intentionally compact so the vector database does not
-    become filled with complete source files or massive logs.
+    Save only successful AutoDev executions.
     """
 
-    try:
-        task = str(task or "").strip()
-
-        if not task:
-            raise ValueError(
-                "Cannot save memory without a task."
-            )
-
-        compact_plan = _compact_plan(
-            plan
-        )
-
-        compact_result = _compact_result(
-            result
-        )
-
-        experience = {
-            "task": task,
-
-            "plan": compact_plan,
-
-            "result": compact_result,
-
-            "saved_at": datetime.now(
-                timezone.utc
-            ).isoformat(),
-        }
-
-        document = json.dumps(
-            experience,
-            ensure_ascii=False,
-        )
-
-        metadata = {
-            "task": task[:1000],
-
-            "project_name": str(
-                compact_plan.get(
-                    "project_name",
-                    ""
-                )
-            )[:500],
-
-            "success": bool(
-                compact_result.get(
-                    "success",
-                    False
-                )
-            ),
-
-            "repair_attempts": _safe_int(
-                compact_result.get(
-                    "repair_attempts",
-                    0
-                )
-            ),
-
-            "saved_at": experience[
-                "saved_at"
-            ],
-        }
-
-        memory_id = str(
-            uuid.uuid4()
-        )
-
-        collection.add(
-            documents=[document],
-            metadatas=[metadata],
-            ids=[memory_id],
-        )
-
-        log(
-            f"🧠 Memory saved: "
-            f"{compact_plan.get('project_name', 'unknown')} "
-            f"| repairs="
-            f"{compact_result.get('repair_attempts', 0)}"
-        )
-
-        return memory_id
-
-    except Exception as exc:
-        # Memory should never break the main AutoDev pipeline.
-        log(
-            f"⚠️ Memory save failed: {exc}"
-        )
+    if not isinstance(result, dict):
         return None
 
+    if not result.get("success"):
+        return None
 
-# ============================================================
-# SEARCH MEMORY
-# ============================================================
+    task = str(task or "").strip()
+
+    if not task:
+        return None
+
+    project_name = str(
+        plan.get(
+            "project_name",
+            "Unknown Project",
+        )
+    ).strip()
+
+    files = plan.get(
+        "files",
+        [],
+    )
+
+    file_paths = [
+        str(item.get("path"))
+        for item in files
+        if isinstance(item, dict)
+        and item.get("path")
+    ]
+
+    behavior = plan.get(
+        "behavior_specification",
+        {},
+    )
+
+    lessons = _build_lessons(result)
+
+    experience = {
+        "task": task[:MAX_TASK_CHARS],
+        "project_name": project_name[:500],
+        "summary": str(
+            plan.get(
+                "summary",
+                "",
+            )
+        )[:MAX_SUMMARY_CHARS],
+        "language": str(
+            plan.get(
+                "language",
+                "python",
+            )
+        ),
+        "behavior_specification": behavior,
+        "file_paths": file_paths[:50],
+        "tests_passed": bool(
+            result.get(
+                "tests_passed",
+                False,
+            )
+        ),
+        "application_passed": bool(
+            result.get(
+                "application_passed",
+                False,
+            )
+        ),
+        "repair_attempts": int(
+            result.get(
+                "repair_attempts",
+                0,
+            )
+            or 0
+        ),
+        "lessons": lessons,
+    }
+
+    document = _safe_json(
+        experience
+    )
+
+    memory_id = str(
+        uuid.uuid4()
+    )
+
+    metadata = {
+        "task": task[:MAX_TASK_CHARS],
+        "project_name": project_name[:500],
+        "language": str(
+            plan.get(
+                "language",
+                "python",
+            )
+        ),
+        "success": True,
+        "repair_attempts": int(
+            result.get(
+                "repair_attempts",
+                0,
+            )
+            or 0
+        ),
+    }
+
+    _collection.add(
+        ids=[memory_id],
+        documents=[document],
+        metadatas=[metadata],
+    )
+
+    return memory_id
+
 
 def search_memory(
     task: str,
     n_results: int = 3,
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """
-    Retrieve the most relevant previous AutoDev experiences.
+    Retrieve semantically similar successful experiences.
+    """
 
-    Returns a list of structured memory objects.
-    """
+    task = str(task or "").strip()
+
+    if not task:
+        return []
 
     try:
-        task = str(task or "").strip()
+        total = _collection.count()
 
-        if not task:
-            return []
-
-        count = collection.count()
-
-        if count <= 0:
+        if total == 0:
             return []
 
         n_results = max(
             1,
             min(
                 int(n_results),
-                count,
-            )
+                total,
+            ),
         )
 
-        results = collection.query(
+        results = _collection.query(
             query_texts=[task],
             n_results=n_results,
         )
 
-        documents = (
-            results.get("documents") or [[]]
-        )[0]
-
-        metadatas = (
-            results.get("metadatas") or [[]]
-        )[0]
-
-        distances = (
-            results.get("distances") or [[]]
-        )[0]
-
-        memories: List[Dict[str, Any]] = []
-
-        for index, document in enumerate(
-            documents
-        ):
-            try:
-                experience = json.loads(
-                    document
-                )
-
-                if not isinstance(
-                    experience,
-                    dict,
-                ):
-                    continue
-
-            except (
-                json.JSONDecodeError,
-                TypeError,
-            ):
-                continue
-
-            metadata = {}
-
-            if index < len(metadatas):
-                metadata = (
-                    metadatas[index] or {}
-                )
-
-            distance = None
-
-            if index < len(distances):
-                distance = distances[index]
-
-            memories.append({
-                "task": experience.get(
-                    "task",
-                    metadata.get(
-                        "task",
-                        ""
-                    ),
-                ),
-
-                "project_name": (
-                    experience
-                    .get("plan", {})
-                    .get(
-                        "project_name",
-                        metadata.get(
-                            "project_name",
-                            "",
-                        ),
-                    )
-                ),
-
-                "summary": (
-                    experience
-                    .get("plan", {})
-                    .get(
-                        "summary",
-                        "",
-                    )
-                ),
-
-                "language": (
-                    experience
-                    .get("plan", {})
-                    .get(
-                        "language",
-                        "",
-                    )
-                ),
-
-                "run_command": (
-                    experience
-                    .get("plan", {})
-                    .get(
-                        "run_command",
-                        "",
-                    )
-                ),
-
-                "test_command": (
-                    experience
-                    .get("plan", {})
-                    .get(
-                        "test_command",
-                        "",
-                    )
-                ),
-
-                "files": (
-                    experience
-                    .get("plan", {})
-                    .get(
-                        "files",
-                        [],
-                    )
-                ),
-
-                "success": (
-                    experience
-                    .get("result", {})
-                    .get(
-                        "success",
-                        metadata.get(
-                            "success",
-                            False,
-                        ),
-                    )
-                ),
-
-                "repair_attempts": (
-                    experience
-                    .get("result", {})
-                    .get(
-                        "repair_attempts",
-                        metadata.get(
-                            "repair_attempts",
-                            0,
-                        ),
-                    )
-                ),
-
-                "repair_history": (
-                    experience
-                    .get("result", {})
-                    .get(
-                        "repair_history",
-                        [],
-                    )
-                ),
-
-                "saved_at": experience.get(
-                    "saved_at",
-                    metadata.get(
-                        "saved_at",
-                        "",
-                    ),
-                ),
-
-                "distance": distance,
-            })
-
-        log(
-            f"🔎 Memory search: "
-            f"{len(memories)} relevant experience(s)"
-        )
-
-        return memories
-
-    except Exception as exc:
-        # Retrieval failure should never stop planning.
-        log(
-            f"⚠️ Memory search failed: {exc}"
-        )
+    except Exception:
         return []
 
+    documents = (
+        results.get(
+            "documents",
+            [[]],
+        )[0]
+        if results
+        else []
+    )
 
-# ============================================================
-# FORMAT MEMORY FOR LLM PROMPTS
-# ============================================================
+    distances = (
+        results.get(
+            "distances",
+            [[]],
+        )[0]
+        if results
+        else []
+    )
+
+    memories = []
+
+    for index, document in enumerate(
+        documents
+    ):
+        try:
+            data = json.loads(
+                document
+            )
+
+        except (
+            json.JSONDecodeError,
+            TypeError,
+        ):
+            data = {
+                "experience": document
+            }
+
+        if index < len(distances):
+            data["_distance"] = distances[index]
+
+        memories.append(data)
+
+    return memories
+
 
 def format_memories_for_prompt(
-    memories: List[Dict[str, Any]],
+    memories: list[dict[str, Any]],
 ) -> str:
     """
-    Convert retrieved memories into concise planner context.
+    Convert retrieved experiences into compact planner context.
     """
 
     if not memories:
         return (
-            "No relevant previous AutoDev experiences "
-            "were found."
+            "No relevant previous experience found."
         )
 
     sections = []
@@ -503,87 +322,74 @@ def format_memories_for_prompt(
         memories,
         start=1,
     ):
-        files = memory.get(
-            "files",
+        behavior = memory.get(
+            "behavior_specification",
+            {},
+        )
+
+        lessons = memory.get(
+            "lessons",
             [],
         )
 
-        if not isinstance(files, list):
-            files = []
-
-        changed_files = []
-
-        for repair in memory.get(
-            "repair_history",
-            [],
-        ):
-            if not isinstance(
-                repair,
-                dict,
-            ):
-                continue
-
-            changed_files.extend(
-                repair.get(
-                    "files_changed",
-                    [],
-                )
-            )
-
-        section = f"""
-Previous Experience #{index}
-
-Task:
-{memory.get("task", "")}
-
-Project:
-{memory.get("project_name", "")}
-
-Summary:
-{memory.get("summary", "")}
-
-Language:
-{memory.get("language", "")}
-
-Run Command:
-{memory.get("run_command", "")}
-
-Test Command:
-{memory.get("test_command", "")}
-
-Project Files:
-{", ".join(files) if files else "None"}
-
-Previous Result:
-{"SUCCESS" if memory.get("success") else "FAILED"}
-
-Repair Attempts:
-{memory.get("repair_attempts", 0)}
-
-Files Changed During Repair:
-{", ".join(changed_files) if changed_files else "None"}
-""".strip()
-
-        sections.append(section)
+        sections.append(
+            "\n".join([
+                f"Experience {index}",
+                (
+                    "Task: "
+                    f"{memory.get('task', '')}"
+                ),
+                (
+                    "Project: "
+                    f"{memory.get('project_name', '')}"
+                ),
+                (
+                    "Summary: "
+                    f"{memory.get('summary', '')}"
+                ),
+                (
+                    "Language: "
+                    f"{memory.get('language', 'python')}"
+                ),
+                (
+                    "Behavior: "
+                    f"{_safe_json(behavior)}"
+                ),
+                (
+                    "Repair attempts: "
+                    f"{memory.get('repair_attempts', 0)}"
+                ),
+                (
+                    "Lessons: "
+                    f"{_safe_json(lessons)}"
+                ),
+            ])
+        )
 
     return "\n\n".join(
         sections
     )
 
 
-# ============================================================
-# MEMORY STATS
-# ============================================================
-
 def memory_count() -> int:
-    """
-    Return the number of stored experiences.
-    """
-
     try:
-        return collection.count()
-    except Exception as exc:
-        log(
-            f"⚠️ Memory count failed: {exc}"
-        )
+        return _collection.count()
+    except Exception:
         return 0
+
+
+def clear_memory() -> None:
+    global _collection
+
+    _client.delete_collection(
+        "autodev_experiences"
+    )
+
+    _collection = _client.get_or_create_collection(
+        name="autodev_experiences",
+        metadata={
+            "description": (
+                "Successful AutoDev engineering experiences"
+            )
+        },
+    )
