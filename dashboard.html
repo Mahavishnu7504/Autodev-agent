@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,7 +17,6 @@
             --surface: #0f141d;
             --surface-2: #141b26;
             --surface-3: #192231;
-
             --border: #252f3e;
 
             --text: #edf2f7;
@@ -42,6 +42,7 @@
         body {
             background: var(--bg);
             color: var(--text);
+
             font-family:
                 Inter,
                 ui-sans-serif,
@@ -105,7 +106,6 @@
 
             font-size: 17px;
             font-weight: 700;
-            letter-spacing: -0.2px;
         }
 
         .brand-subtitle {
@@ -115,12 +115,63 @@
             font-size: 11px;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .connection {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+
+            padding: 6px 10px;
+
+            border-radius: 999px;
+
+            border: 1px solid var(--border);
+
+            color: var(--muted);
+
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .connection-dot {
+            width: 6px;
+            height: 6px;
+
+            border-radius: 50%;
+
+            background: var(--warning);
+        }
+
+        .connection.online {
+            color: var(--success);
+            border-color: #235e43;
+        }
+
+        .connection.online .connection-dot {
+            background: var(--success);
+        }
+
+        .connection.offline {
+            color: var(--danger);
+            border-color: #69303d;
+        }
+
+        .connection.offline .connection-dot {
+            background: var(--danger);
+        }
+
         .agent-state {
             display: flex;
             align-items: center;
             gap: 7px;
 
             color: var(--success);
+
             font-size: 11px;
             font-weight: 700;
         }
@@ -130,6 +181,7 @@
             height: 7px;
 
             border-radius: 50%;
+
             background: var(--success);
         }
 
@@ -139,6 +191,7 @@
 
         .layout {
             display: grid;
+
             grid-template-columns: 270px minmax(0, 1fr);
 
             min-height: calc(100vh - 68px);
@@ -148,6 +201,7 @@
             padding: 18px;
 
             background: var(--surface);
+
             border-right: 1px solid var(--border);
 
             overflow-y: auto;
@@ -155,6 +209,7 @@
 
         .main {
             min-width: 0;
+
             padding: 22px 24px;
 
             overflow-y: auto;
@@ -179,9 +234,10 @@
         .section-title {
             margin: 0;
 
+            color: var(--muted);
+
             font-size: 12px;
             font-weight: 700;
-            color: var(--muted);
 
             text-transform: uppercase;
             letter-spacing: 0.6px;
@@ -191,6 +247,7 @@
             margin-top: 3px;
 
             color: var(--muted);
+
             font-size: 10px;
         }
 
@@ -207,6 +264,7 @@
             border: 1px solid var(--border);
 
             color: var(--muted);
+
             font-size: 13px;
         }
 
@@ -215,13 +273,24 @@
             border-color: #3a4b63;
         }
 
+        .empty {
+            padding: 20px 8px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+
+            text-align: center;
+        }
+
         /* =========================================================
-           SIDEBAR PROJECTS
+           PROJECT SIDEBAR
         ========================================================= */
 
         .project-list {
             display: flex;
             flex-direction: column;
+
             gap: 6px;
         }
 
@@ -238,10 +307,6 @@
             color: var(--text);
 
             text-align: left;
-
-            transition:
-                background 0.15s,
-                border-color 0.15s;
         }
 
         .project-item:hover {
@@ -270,16 +335,8 @@
             margin-top: 4px;
 
             color: var(--muted);
+
             font-size: 10px;
-        }
-
-        .empty {
-            padding: 20px 8px;
-
-            color: var(--muted);
-
-            font-size: 11px;
-            text-align: center;
         }
 
         /* =========================================================
@@ -288,6 +345,7 @@
 
         .home {
             max-width: 1100px;
+
             margin: 0 auto;
         }
 
@@ -300,6 +358,7 @@
 
             font-size: 25px;
             font-weight: 750;
+
             letter-spacing: -0.6px;
         }
 
@@ -307,6 +366,7 @@
             margin: 6px 0 0;
 
             color: var(--muted);
+
             font-size: 13px;
         }
 
@@ -318,7 +378,9 @@
             padding: 17px;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 12px;
         }
 
@@ -328,20 +390,24 @@
             margin-bottom: 8px;
 
             color: var(--muted);
+
             font-size: 11px;
             font-weight: 650;
         }
 
         textarea {
             width: 100%;
-            min-height: 105px;
+
+            min-height: 125px;
 
             padding: 12px;
 
             resize: vertical;
 
             background: var(--code);
+
             border: 1px solid var(--border);
+
             border-radius: 8px;
 
             color: var(--text);
@@ -349,6 +415,7 @@
             outline: none;
 
             font-size: 13px;
+
             line-height: 1.55;
         }
 
@@ -366,6 +433,7 @@
 
         .task-hint {
             color: var(--muted);
+
             font-size: 10px;
         }
 
@@ -375,6 +443,7 @@
             border-radius: 7px;
 
             background: var(--accent);
+
             color: white;
 
             font-size: 12px;
@@ -387,6 +456,7 @@
 
         .primary-button:disabled {
             opacity: 0.55;
+
             cursor: not-allowed;
         }
 
@@ -396,10 +466,13 @@
 
         .task-status {
             margin-top: 16px;
+
             padding: 16px;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 12px;
         }
 
@@ -422,7 +495,9 @@
             margin-top: 4px;
 
             color: var(--muted);
+
             font-family: Consolas, monospace;
+
             font-size: 10px;
         }
 
@@ -432,6 +507,7 @@
             border-radius: 999px;
 
             background: var(--surface-3);
+
             border: 1px solid var(--border);
 
             color: var(--muted);
@@ -457,6 +533,62 @@
             border-color: #69303d;
         }
 
+        .status-badge.queued {
+            color: var(--warning);
+            border-color: #66552b;
+        }
+
+        .task-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .task-runtime {
+            margin-top: 4px;
+            color: var(--muted);
+            font-family: Consolas, monospace;
+            font-size: 10px;
+        }
+
+        .small-button {
+            padding: 7px 10px;
+            border-radius: 6px;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: #dce5f0;
+            font-size: 10px;
+            font-weight: 650;
+        }
+
+        .small-button:hover {
+            border-color: #3b506d;
+        }
+
+        .small-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .small-button.cancel {
+            color: #ff9cac;
+            border-color: #69303d;
+        }
+
+        .small-button.retry {
+            background: #183663;
+            border-color: #2c5b99;
+        }
+
+        .status-badge.cancelled,
+        .status-badge.interrupted {
+            color: var(--warning);
+            border-color: #66552b;
+        }
+
+
         .progress-area {
             margin-top: 14px;
         }
@@ -469,6 +601,7 @@
             margin-bottom: 6px;
 
             color: var(--muted);
+
             font-size: 10px;
         }
 
@@ -479,6 +612,7 @@
             overflow: hidden;
 
             background: #1a2230;
+
             border-radius: 999px;
         }
 
@@ -494,11 +628,12 @@
         }
 
         /* =========================================================
-           TASK METRICS
+           METRICS
         ========================================================= */
 
         .metrics {
             display: grid;
+
             grid-template-columns: repeat(4, 1fr);
 
             gap: 8px;
@@ -510,13 +645,17 @@
             padding: 10px;
 
             background: var(--surface-2);
+
             border: 1px solid var(--border);
+
             border-radius: 8px;
         }
 
         .metric-label {
             color: var(--muted);
+
             font-size: 9px;
+
             text-transform: uppercase;
         }
 
@@ -536,11 +675,41 @@
         }
 
         /* =========================================================
-           TASK DETAILS
+           ERROR
+        ========================================================= */
+
+        .task-error {
+            display: none;
+
+            margin-top: 10px;
+
+            padding: 10px;
+
+            background: #21151a;
+
+            border: 1px solid #69303d;
+
+            border-radius: 8px;
+
+            color: #ff9cac;
+
+            font: 10px/1.5 Consolas, monospace;
+
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .task-error.visible {
+            display: block;
+        }
+
+        /* =========================================================
+           TASK GRID
         ========================================================= */
 
         .task-grid {
             display: grid;
+
             grid-template-columns: 1.4fr 1fr;
 
             gap: 12px;
@@ -552,7 +721,9 @@
             min-width: 0;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 12px;
         }
 
@@ -568,7 +739,7 @@
         }
 
         .logs {
-            height: 250px;
+            height: 280px;
 
             padding: 12px;
 
@@ -581,12 +752,14 @@
 
         .log-line {
             color: #b9c5d5;
+
             white-space: pre-wrap;
+
             word-break: break-word;
         }
 
         .result {
-            height: 250px;
+            height: 280px;
 
             padding: 12px;
 
@@ -597,6 +770,7 @@
             color: #b9c5d5;
 
             font: 11px/1.55 Consolas, monospace;
+
             white-space: pre-wrap;
         }
 
@@ -604,17 +778,15 @@
            RECENT TASKS
         ========================================================= */
 
-        .recent-tasks {
-            margin-top: 16px;
-        }
-
         .recent-list {
-            max-height: 210px;
+            max-height: 250px;
+
             overflow-y: auto;
         }
 
         .recent-item {
             display: grid;
+
             grid-template-columns: 1fr auto;
 
             gap: 10px;
@@ -624,10 +796,6 @@
             border-bottom: 1px solid var(--border);
 
             cursor: pointer;
-        }
-
-        .recent-item:last-child {
-            border-bottom: 0;
         }
 
         .recent-item:hover {
@@ -650,6 +818,7 @@
             margin-top: 3px;
 
             color: var(--muted);
+
             font-size: 9px;
         }
 
@@ -665,13 +834,14 @@
         }
 
         /* =========================================================
-           PROJECT DETAIL
+           PROJECT VIEW
         ========================================================= */
 
         .project-view {
             display: none;
 
             max-width: 1200px;
+
             margin: 0 auto;
         }
 
@@ -687,6 +857,7 @@
             border-radius: 7px;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
 
             color: var(--muted);
@@ -702,12 +873,15 @@
             padding: 16px;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 12px;
         }
 
         .project-header-top {
             display: flex;
+
             align-items: flex-start;
             justify-content: space-between;
 
@@ -727,11 +901,13 @@
             color: var(--muted);
 
             font-size: 11px;
+
             line-height: 1.5;
         }
 
         .project-buttons {
             display: flex;
+
             gap: 6px;
         }
 
@@ -741,6 +917,7 @@
             border-radius: 6px;
 
             background: var(--surface-2);
+
             border: 1px solid var(--border);
 
             color: #dce5f0;
@@ -755,6 +932,7 @@
 
         .small-button.download {
             background: #183663;
+
             border-color: #2c5b99;
         }
 
@@ -764,6 +942,7 @@
 
         .project-stats {
             display: grid;
+
             grid-template-columns: repeat(3, 1fr);
 
             gap: 8px;
@@ -775,13 +954,17 @@
             padding: 10px;
 
             background: var(--surface-2);
+
             border: 1px solid var(--border);
+
             border-radius: 8px;
         }
 
         .project-stat-label {
             color: var(--muted);
+
             font-size: 9px;
+
             text-transform: uppercase;
         }
 
@@ -798,6 +981,7 @@
 
         .file-viewer {
             display: grid;
+
             grid-template-columns: 220px minmax(0, 1fr);
 
             min-height: 500px;
@@ -805,7 +989,9 @@
             margin-top: 12px;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 12px;
 
             overflow: hidden;
@@ -841,6 +1027,7 @@
 
         .file-item.active {
             background: #17335f;
+
             color: #dceaff;
         }
 
@@ -874,6 +1061,7 @@
             font: 12px/1.6 Consolas, monospace;
 
             white-space: pre-wrap;
+
             word-break: break-word;
         }
 
@@ -887,7 +1075,9 @@
             padding: 14px;
 
             background: var(--surface);
+
             border: 1px solid var(--border);
+
             border-radius: 12px;
         }
 
@@ -897,6 +1087,7 @@
             color: var(--muted);
 
             font-size: 11px;
+
             font-weight: 700;
         }
 
@@ -906,6 +1097,7 @@
             margin-bottom: 6px;
 
             background: var(--surface-2);
+
             border-left: 2px solid var(--warning);
 
             border-radius: 0 6px 6px 0;
@@ -917,6 +1109,7 @@
 
         .repair-label {
             font-size: 10px;
+
             font-weight: 700;
         }
 
@@ -935,17 +1128,20 @@
         ========================================================= */
 
         @media (max-width: 900px) {
+
             .layout {
                 grid-template-columns: 1fr;
             }
 
             .sidebar {
                 border-right: 0;
+
                 border-bottom: 1px solid var(--border);
             }
 
             .project-list {
                 display: grid;
+
                 grid-template-columns: repeat(2, 1fr);
             }
 
@@ -955,6 +1151,7 @@
         }
 
         @media (max-width: 650px) {
+
             header {
                 padding: 0 15px;
             }
@@ -978,7 +1175,9 @@
 
             .file-list {
                 max-height: 180px;
+
                 border-right: 0;
+
                 border-bottom: 1px solid var(--border);
             }
 
@@ -986,7 +1185,16 @@
             .task-status-header,
             .project-header-top {
                 align-items: flex-start;
+
                 flex-direction: column;
+            }
+
+            .header-right {
+                gap: 6px;
+            }
+
+            .agent-state {
+                display: none;
             }
         }
     </style>
@@ -994,1186 +1202,1591 @@
 
 <body>
 
-<header>
-    <div class="brand">
-        <div class="brand-icon">⚡</div>
+    <header>
 
-        <div>
-            <h1 class="brand-title">AutoDev Agent</h1>
-            <p class="brand-subtitle">
-                Autonomous software engineering
-            </p>
+        <div class="brand">
+
+            <div class="brand-icon">
+                ⚡
+            </div>
+
+            <div>
+
+                <h1 class="brand-title">
+                    AutoDev Agent
+                </h1>
+
+                <p class="brand-subtitle">
+                    Autonomous software engineering
+                </p>
+
+            </div>
+
         </div>
-    </div>
-
-    <div class="agent-state">
-        <span class="agent-dot"></span>
-        READY
-    </div>
-</header>
 
 
-<div class="layout">
+        <div class="header-right">
 
-    <!-- =====================================================
+            <div id="connection-status" class="connection">
+
+                <span class="connection-dot"></span>
+
+                CONNECTING
+
+            </div>
+
+
+            <div class="agent-state">
+
+                <span class="agent-dot"></span>
+
+                READY
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <div class="layout">
+
+
+        <!-- =====================================================
          SIDEBAR
     ====================================================== -->
 
-    <aside class="sidebar">
-
-        <div class="section">
-
-            <div class="section-header">
-                <div>
-                    <div class="section-title">Projects</div>
-
-                    <div
-                        id="project-count"
-                        class="count"
-                    >
-                        Loading...
-                    </div>
-                </div>
-
-                <button
-                    class="icon-button"
-                    onclick="loadProjects()"
-                    title="Refresh projects"
-                >
-                    ↻
-                </button>
-            </div>
-
-            <div
-                id="projects"
-                class="project-list"
-            >
-                <div class="empty">
-                    Loading projects...
-                </div>
-            </div>
-
-        </div>
+        <aside class="sidebar">
 
 
-        <div class="section">
+            <!-- PROJECTS -->
 
-            <div class="section-header">
+            <div class="section">
 
-                <div>
-                    <div class="section-title">
-                        Recent Tasks
+                <div class="section-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            Projects
+                        </div>
+
+                        <div id="project-count" class="count">
+                            Loading...
+                        </div>
+
                     </div>
 
-                    <div class="count">
-                        Background executions
-                    </div>
-                </div>
 
-                <button
-                    class="icon-button"
-                    onclick="loadTasks()"
-                    title="Refresh tasks"
-                >
-                    ↻
-                </button>
-
-            </div>
-
-            <div
-                id="recent-tasks"
-                class="recent-list"
-            >
-                <div class="empty">
-                    No tasks yet.
-                </div>
-            </div>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
-    <main class="main">
-
-        <!-- =================================================
-             HOME
-        ================================================== -->
-
-        <div
-            id="home-view"
-            class="home"
-        >
-
-            <div class="hero">
-                <h1>Build something.</h1>
-
-                <p>
-                    Describe what you want and let AutoDev plan,
-                    generate, test, repair and package it.
-                </p>
-            </div>
-
-
-            <!-- TASK INPUT -->
-
-            <section class="task-panel">
-
-                <label
-                    class="task-label"
-                    for="task-input"
-                >
-                    TASK REQUIREMENT
-                </label>
-
-                <textarea
-                    id="task-input"
-                    placeholder="Example: Build a Python calculator with add, subtract, multiply and divide operations."
-                ></textarea>
-
-                <div class="task-actions">
-
-                    <div class="task-hint">
-                        Runs autonomously in the background.
-                    </div>
-
-                    <button
-                        id="run-button"
-                        class="primary-button"
-                        onclick="startTask()"
-                    >
-                        Run Agent
+                    <button class="icon-button" onclick="loadProjects()" title="Refresh projects">
+                        ↻
                     </button>
 
                 </div>
 
-            </section>
 
+                <div id="projects" class="project-list">
 
-            <!-- ACTIVE TASK -->
-
-            <section
-                id="task-status"
-                class="task-status"
-                style="display:none;"
-            >
-
-                <div class="task-status-header">
-
-                    <div>
-                        <h2
-                            id="task-title"
-                            class="task-status-title"
-                        >
-                            Autonomous Task
-                        </h2>
-
-                        <div
-                            id="task-id"
-                            class="task-id"
-                        ></div>
-                    </div>
-
-                    <div
-                        id="task-badge"
-                        class="status-badge"
-                    >
-                        QUEUED
+                    <div class="empty">
+                        Loading projects...
                     </div>
 
                 </div>
-
-
-                <div class="progress-area">
-
-                    <div class="progress-info">
-
-                        <span id="task-phase">
-                            Waiting
-                        </span>
-
-                        <strong id="task-progress">
-                            0%
-                        </strong>
-
-                    </div>
-
-                    <div class="progress-track">
-                        <div
-                            id="progress-bar"
-                            class="progress-bar"
-                        ></div>
-                    </div>
-
-                </div>
-
-
-                <div class="metrics">
-
-                    <div class="metric">
-                        <div class="metric-label">
-                            Tests
-                        </div>
-
-                        <div
-                            id="metric-tests"
-                            class="metric-value"
-                        >
-                            —
-                        </div>
-                    </div>
-
-
-                    <div class="metric">
-                        <div class="metric-label">
-                            Application
-                        </div>
-
-                        <div
-                            id="metric-app"
-                            class="metric-value"
-                        >
-                            —
-                        </div>
-                    </div>
-
-
-                    <div class="metric">
-                        <div class="metric-label">
-                            Repairs
-                        </div>
-
-                        <div
-                            id="metric-repairs"
-                            class="metric-value"
-                        >
-                            —
-                        </div>
-                    </div>
-
-
-                    <div class="metric">
-                        <div class="metric-label">
-                            Quality Gate
-                        </div>
-
-                        <div
-                            id="metric-quality"
-                            class="metric-value"
-                        >
-                            —
-                        </div>
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- LIVE EXECUTION -->
-
-            <div
-                id="execution-area"
-                class="task-grid"
-                style="display:none;"
-            >
-
-                <section class="panel">
-
-                    <div class="panel-header">
-                        LIVE AGENT LOG
-                    </div>
-
-                    <div
-                        id="live-logs"
-                        class="logs"
-                    >
-                        Waiting for agent...
-                    </div>
-
-                </section>
-
-
-                <section class="panel">
-
-                    <div class="panel-header">
-                        EXECUTION RESULT
-                    </div>
-
-                    <div
-                        id="task-result"
-                        class="result"
-                    >
-                        Waiting for completion...
-                    </div>
-
-                </section>
 
             </div>
 
-        </div>
+
+            <!-- RECENT TASKS -->
+
+            <div class="section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <div class="section-title">
+                            Recent Tasks
+                        </div>
+
+                        <div class="count">
+                            Background executions
+                        </div>
+
+                    </div>
 
 
-        <!-- =================================================
+                    <button class="icon-button" onclick="loadTasks()" title="Refresh tasks">
+                        ↻
+                    </button>
+
+                </div>
+
+
+                <div id="recent-tasks" class="recent-list">
+
+                    <div class="empty">
+                        No tasks yet.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </aside>
+
+
+        <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+        <main class="main">
+
+
+            <!-- =================================================
+             HOME
+        ================================================== -->
+
+            <div id="home-view" class="home">
+
+
+                <!-- HERO -->
+
+                <div class="hero">
+
+                    <h1>
+                        Build something.
+                    </h1>
+
+                    <p>
+                        Describe what you want and let AutoDev plan,
+                        generate, test, repair and package it.
+                    </p>
+
+                </div>
+
+
+                <!-- =================================================
+                 TASK INPUT
+            ================================================== -->
+
+                <section class="task-panel">
+
+                    <label class="task-label" for="task-input">
+                        TASK REQUIREMENT
+                    </label>
+
+
+                    <textarea id="task-input"
+                        placeholder="Example: Build a Python calculator with add, subtract, multiply and divide operations."></textarea>
+
+
+                    <div class="task-actions">
+
+                        <div class="task-hint">
+
+                            Runs autonomously in the background.
+
+                        </div>
+
+
+                        <button id="run-button" class="primary-button" onclick="startTask()">
+                            Run Agent
+                        </button>
+
+                    </div>
+
+                </section>
+
+
+                <!-- =================================================
+                 ACTIVE TASK
+            ================================================== -->
+
+                <section id="task-status" class="task-status" style="display:none;">
+
+                    <div class="task-status-header">
+
+                        <div>
+                            <h2 id="task-title" class="task-status-title">
+                                Autonomous Task
+                            </h2>
+
+                            <div id="task-id" class="task-id"></div>
+                            <div id="task-runtime" class="task-runtime"></div>
+                        </div>
+
+                        <div class="task-controls">
+
+                            <div id="task-badge" class="status-badge">
+                                QUEUED
+                            </div>
+
+                            <button
+                                id="cancel-task-button"
+                                class="small-button cancel"
+                                onclick="cancelCurrentTask()"
+                                style="display:none;"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                id="retry-task-button"
+                                class="small-button retry"
+                                onclick="retryCurrentTask()"
+                                style="display:none;"
+                            >
+                                Retry
+                            </button>
+
+                            <button
+                                class="small-button"
+                                onclick="refreshTask()"
+                            >
+                                Refresh
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    <div class="progress-area">
+
+                        <div class="progress-info">
+                            <span id="task-phase">Waiting</span>
+                            <strong id="task-progress">0%</strong>
+                        </div>
+
+                        <div class="progress-track">
+                            <div id="progress-bar" class="progress-bar"></div>
+                        </div>
+
+                    </div>
+
+                    <div class="metrics">
+
+                        <div class="metric">
+                            <div class="metric-label">Tests</div>
+                            <div id="metric-tests" class="metric-value">—</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">Application</div>
+                            <div id="metric-app" class="metric-value">—</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">Repairs</div>
+                            <div id="metric-repairs" class="metric-value">—</div>
+                        </div>
+
+                        <div class="metric">
+                            <div class="metric-label">Quality Gate</div>
+                            <div id="metric-quality" class="metric-value">—</div>
+                        </div>
+
+                    </div>
+
+                    <div id="task-error" class="task-error"></div>
+
+                </section>
+
+
+                <!-- =================================================
+                 LIVE EXECUTION
+            ================================================== -->
+
+                <div id="execution-area" class="task-grid" style="display:none;">
+
+
+                    <!-- LOGS -->
+
+                    <section class="panel">
+
+                        <div class="panel-header">
+                            LIVE AGENT LOG
+                        </div>
+
+
+                        <div id="live-logs" class="logs">
+                            Waiting for agent...
+                        </div>
+
+                    </section>
+
+
+                    <!-- RESULT -->
+
+                    <section class="panel">
+
+                        <div class="panel-header">
+                            EXECUTION RESULT
+                        </div>
+
+
+                        <div id="task-result" class="result">
+                            Waiting for completion...
+                        </div>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
              PROJECT VIEW
         ================================================== -->
 
-        <div
-            id="project-view"
-            class="project-view"
-        >
+            <div id="project-view" class="project-view">
 
-            <button
-                class="back-button"
-                onclick="showHome()"
-            >
-                ← Projects
-            </button>
+                <button class="back-button" onclick="showHome()">
+                    ← Projects
+                </button>
 
 
-            <div
-                id="project-detail"
-            >
-                Loading project...
+                <div id="project-detail">
+
+                    Loading project...
+
+                </div>
+
             </div>
 
-        </div>
+        </main>
 
-    </main>
-
-</div>
+    </div>
 
 
-<script>
+    <script>
 
-    let currentTaskId = null;
-    let currentProject = null;
-    let pollingTimer = null;
+        /* =========================================================
+           STATE
+        ========================================================= */
 
+        let currentTaskId = null;
 
-    /* ========================================================
-       HELPERS
-    ======================================================== */
+        let currentProject = null;
 
-    function escapeHtml(value) {
+        let pollingTimer = null;
 
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#039;");
-
-    }
+        let healthTimer = null;
 
 
-    function projectName(project) {
+        /* =========================================================
+           HELPERS
+        ========================================================= */
 
-        return (
-            project.display_name ||
-            project.project_name ||
-            project.name ||
-            "Unnamed Project"
-        );
+        function escapeHtml(value) {
 
-    }
+            return String(value ?? "")
 
+                .replaceAll("&", "&amp;")
 
-    function getProjectWorkspace(project) {
+                .replaceAll("<", "&lt;")
 
-        return (
-            project.workspace_name ||
-            project.name ||
-            ""
-        );
+                .replaceAll(">", "&gt;")
 
-    }
+                .replaceAll('"', "&quot;")
 
-
-    function resultPassed(value) {
-
-        return (
-            value === true ||
-            value?.success === true ||
-            value?.passed === true ||
-            value?.status === "passed"
-        );
-
-    }
-
-
-    function setMetric(id, value) {
-
-        const element =
-            document.getElementById(id);
-
-        element.textContent =
-            value;
-
-        element.classList.remove(
-            "pass",
-            "fail"
-        );
-
-        if (
-            value === "PASS"
-        ) {
-            element.classList.add("pass");
-        }
-
-        if (
-            value === "FAIL"
-        ) {
-            element.classList.add("fail");
-        }
-
-    }
-
-
-    /* ========================================================
-       START ASYNC TASK
-    ======================================================== */
-
-    async function startTask() {
-
-        const input =
-            document.getElementById("task-input");
-
-        const button =
-            document.getElementById("run-button");
-
-        const task =
-            input.value.trim();
-
-
-        if (!task) {
-
-            input.focus();
-
-            return;
-
+                .replaceAll("'", "&#039;");
         }
 
 
-        button.disabled = true;
-        button.textContent = "Starting...";
+        function projectName(project) {
+
+            return (
+
+                project.display_name ||
+
+                project.project_name ||
+
+                project.name ||
+
+                "Unnamed Project"
+
+            );
+        }
 
 
-        try {
+        function getProjectWorkspace(project) {
 
-            const response =
-                await fetch(
-                    "/run-task-async",
-                    {
-                        method: "POST",
+            return (
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
+                project.workspace_name ||
 
-                        body: JSON.stringify({
-                            task: task,
-                            inputs: {}
-                        })
-                    }
+                project.name ||
+
+                ""
+
+            );
+        }
+
+
+        function resultPassed(value) {
+
+            return (
+
+                value === true ||
+
+                value?.success === true ||
+
+                value?.passed === true ||
+
+                value?.status === "passed"
+
+            );
+        }
+
+
+        function setMetric(id, value) {
+
+            const element =
+                document.getElementById(id);
+
+            if (!element) {
+                return;
+            }
+
+            element.textContent = value;
+
+            element.classList.remove(
+                "pass",
+                "fail"
+            );
+
+
+            if (value === "PASS") {
+
+                element.classList.add("pass");
+
+            }
+
+
+            if (value === "FAIL") {
+
+                element.classList.add("fail");
+
+            }
+        }
+
+
+        function showError(message) {
+
+            const element =
+                document.getElementById("task-error");
+
+            if (!element) {
+                return;
+            }
+
+
+            if (!message) {
+
+                element.textContent = "";
+
+                element.classList.remove("visible");
+
+                return;
+            }
+
+
+            element.textContent =
+                String(message);
+
+            element.classList.add("visible");
+        }
+
+
+        function setConnection(online) {
+
+            const element =
+                document.getElementById(
+                    "connection-status"
                 );
 
+            if (!element) {
+                return;
+            }
 
-            const data =
-                await response.json();
+
+            element.className =
+                "connection " +
+                (online
+                    ? "online"
+                    : "offline");
 
 
-            if (!response.ok) {
+            element.innerHTML = `
 
-                throw new Error(
-                    data.detail ||
-                    "Unable to start task."
+            <span class="connection-dot"></span>
+
+            ${online
+                    ? "ONLINE"
+                    : "OFFLINE"}
+
+        `;
+        }
+
+
+        /* =========================================================
+           HEALTH CHECK
+        ========================================================= */
+
+        async function checkHealth() {
+
+            try {
+
+                const response =
+                    await fetch("/health");
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "HTTP " +
+                        response.status
+                    );
+
+                }
+
+
+                setConnection(true);
+
+            }
+            catch (error) {
+
+                setConnection(false);
+
+            }
+
+        }
+
+
+        function startHealthPolling() {
+
+            if (healthTimer) {
+
+                clearInterval(
+                    healthTimer
                 );
 
             }
 
 
-            currentTaskId =
-                data.task_id;
+            checkHealth();
 
 
-            document
-                .getElementById("task-status")
-                .style.display = "block";
-
-
-            document
-                .getElementById("execution-area")
-                .style.display = "grid";
-
-
-            document
-                .getElementById("task-title")
-                .textContent = task;
-
-
-            document
-                .getElementById("task-id")
-                .textContent =
-                    "Task ID: " +
-                    currentTaskId;
-
-
-            updateTaskStatus(data);
-
-            startPolling();
-
-            loadTasks();
-
-        }
-        catch (error) {
-
-            alert(
-                "Unable to start task:\n\n" +
-                error.message
-            );
-
-        }
-        finally {
-
-            button.disabled = false;
-            button.textContent = "Run Agent";
+            healthTimer =
+                setInterval(
+                    checkHealth,
+                    5000
+                );
 
         }
 
-    }
 
+        /* =========================================================
+           START TASK
+        ========================================================= */
 
-    /* ========================================================
-       TASK STATUS
-    ======================================================== */
+        async function startTask() {
 
-    async function refreshTask() {
-
-        if (!currentTaskId) {
-            return;
-        }
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/tasks/" +
-                    encodeURIComponent(
-                        currentTaskId
-                    )
+            const input =
+                document.getElementById(
+                    "task-input"
                 );
 
 
-            const data =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.detail ||
-                    "Unable to load task."
-                );
-
-            }
-
-
-            updateTaskStatus(data);
-
-        }
-        catch (error) {
-
-            console.error(
-                "Task status error:",
-                error
-            );
-
-        }
-
-    }
-
-
-    function updateTaskStatus(data) {
-
-        const status =
-            String(
-                data.status ||
-                "queued"
-            ).toLowerCase();
-
-
-        const progress =
-            Math.max(
-                0,
-                Math.min(
-                    100,
-                    Number(
-                        data.progress || 0
-                    )
-                )
-            );
-
-
-        document
-            .getElementById("task-title")
-            .textContent =
-                data.task ||
-                "Autonomous Task";
-
-
-        document
-            .getElementById("task-id")
-            .textContent =
-                "Task ID: " +
-                data.task_id;
-
-
-        document
-            .getElementById("task-phase")
-            .textContent =
-                formatPhase(
-                    data.phase
+            const button =
+                document.getElementById(
+                    "run-button"
                 );
 
 
-        document
-            .getElementById("task-progress")
-            .textContent =
-                progress + "%";
+            const task =
+                input.value.trim();
 
 
-        document
-            .getElementById("progress-bar")
-            .style.width =
-                progress + "%";
+            if (!task) {
 
-
-        const badge =
-            document.getElementById(
-                "task-badge"
-            );
-
-
-        badge.textContent =
-            status.toUpperCase();
-
-
-        badge.className =
-            "status-badge " +
-            status;
-
-
-        updateMetrics(data);
-
-        renderLogs(
-            data.logs || []
-        );
-
-        renderResult(
-            data.result
-        );
-
-
-        if (
-            status === "completed" ||
-            status === "failed"
-        ) {
-
-            stopPolling();
-
-            loadProjects();
-            loadTasks();
-
-        }
-
-    }
-
-
-    function formatPhase(phase) {
-
-        if (!phase) {
-            return "Waiting";
-        }
-
-
-        return String(phase)
-            .replaceAll("_", " ")
-            .replace(
-                /\b\w/g,
-                char =>
-                    char.toUpperCase()
-            );
-
-    }
-
-
-    /* ========================================================
-       METRICS
-    ======================================================== */
-
-    function updateMetrics(data) {
-
-        const result =
-            data.result || {};
-
-
-        const tests =
-            result.test_result || {};
-
-
-        const application =
-            result.run_result || {};
-
-
-        const gate =
-            result.quality_gate || {};
-
-
-        setMetric(
-            "metric-tests",
-            result.tests_passed === true
-                ? "PASS"
-                : result.tests_passed === false
-                    ? "FAIL"
-                    : tests.passed !== undefined
-                        ? (
-                            tests.passed
-                                ? "PASS"
-                                : "FAIL"
-                        )
-                        : "—"
-        );
-
-
-        setMetric(
-            "metric-app",
-            result.application_passed === true
-                ? "PASS"
-                : result.application_passed === false
-                    ? "FAIL"
-                    : application.success !== undefined
-                        ? (
-                            application.success
-                                ? "PASS"
-                                : "FAIL"
-                        )
-                        : "—"
-        );
-
-
-        document
-            .getElementById(
-                "metric-repairs"
-            )
-            .textContent =
-                result.repair_attempts ??
-                "—";
-
-
-        setMetric(
-            "metric-quality",
-            gate.passed === true
-                ? "PASS"
-                : gate.passed === false
-                    ? "FAIL"
-                    : "—"
-        );
-
-    }
-
-
-    /* ========================================================
-       LOGS
-    ======================================================== */
-
-    function renderLogs(logs) {
-
-        const container =
-            document.getElementById(
-                "live-logs"
-            );
-
-
-        if (
-            !logs ||
-            !logs.length
-        ) {
-
-            container.textContent =
-                "Waiting for agent...";
-
-            return;
-
-        }
-
-
-        container.innerHTML =
-            logs
-                .map(
-                    line =>
-                        `<div class="log-line">${escapeHtml(line)}</div>`
-                )
-                .join("");
-
-
-        container.scrollTop =
-            container.scrollHeight;
-
-    }
-
-
-    /* ========================================================
-       RESULT
-    ======================================================== */
-
-    function renderResult(result) {
-
-        const container =
-            document.getElementById(
-                "task-result"
-            );
-
-
-        if (!result) {
-
-            container.textContent =
-                "Waiting for completion...";
-
-            return;
-
-        }
-
-
-        const summary = {
-
-            success:
-                result.success,
-
-            project:
-                result.workspace_name ||
-                result.project_name,
-
-            files:
-                result.files,
-
-            tests_passed:
-                result.tests_passed,
-
-            application_passed:
-                result.application_passed,
-
-            repair_attempts:
-                result.repair_attempts,
-
-            quality_gate:
-                result.quality_gate?.passed,
-
-            zip:
-                result.zip_file
-
-        };
-
-
-        container.textContent =
-            JSON.stringify(
-                summary,
-                null,
-                2
-            );
-
-    }
-
-
-    /* ========================================================
-       POLLING
-    ======================================================== */
-
-    function startPolling() {
-
-        stopPolling();
-
-        pollingTimer =
-            setInterval(
-                refreshTask,
-                900
-            );
-
-    }
-
-
-    function stopPolling() {
-
-        if (pollingTimer) {
-
-            clearInterval(
-                pollingTimer
-            );
-
-            pollingTimer = null;
-
-        }
-
-    }
-
-
-    /* ========================================================
-       PROJECTS
-    ======================================================== */
-
-    async function loadProjects() {
-
-        const container =
-            document.getElementById(
-                "projects"
-            );
-
-        const count =
-            document.getElementById(
-                "project-count"
-            );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/projects"
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "HTTP " +
-                    response.status
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-            const projects =
-                Array.isArray(data)
-                    ? data
-                    : data.projects || [];
-
-
-            count.textContent =
-                projects.length +
-                (
-                    projects.length === 1
-                        ? " project"
-                        : " projects"
-                );
-
-
-            container.innerHTML = "";
-
-
-            if (!projects.length) {
-
-                container.innerHTML =
-                    '<div class="empty">No projects yet.</div>';
+                input.focus();
 
                 return;
 
             }
 
 
-            projects.forEach(
-                project => {
+            button.disabled = true;
 
-                    const workspace =
-                        getProjectWorkspace(
-                            project
-                        );
+            button.textContent =
+                "Starting...";
 
 
-                    const files =
-                        project.file_count ??
-                        (
-                            Array.isArray(
-                                project.files
+            showError("");
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/run-task-async",
+                        {
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    task: task,
+                                    inputs: {}
+                                })
+                        }
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to start task."
+                    );
+
+                }
+
+
+                currentTaskId =
+                    data.task_id;
+
+
+                document
+                    .getElementById(
+                        "task-status"
+                    )
+                    .style.display =
+                    "block";
+
+
+                document
+                    .getElementById(
+                        "execution-area"
+                    )
+                    .style.display =
+                    "grid";
+
+
+                document
+                    .getElementById(
+                        "task-title"
+                    )
+                    .textContent =
+                    task;
+
+
+                document
+                    .getElementById(
+                        "task-id"
+                    )
+                    .textContent =
+                    "Task ID: " +
+                    currentTaskId;
+
+
+                updateTaskStatus(data);
+
+
+                startPolling();
+
+
+                await loadTasks();
+
+
+                setConnection(true);
+
+            }
+            catch (error) {
+
+                showError(
+                    "Unable to start task:\n" +
+                    error.message
+                );
+
+                setConnection(false);
+
+            }
+            finally {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Run Agent";
+
+            }
+
+        }
+
+
+        /* =========================================================
+           REFRESH TASK
+        ========================================================= */
+
+        async function refreshTask() {
+
+            if (!currentTaskId) {
+
+                return;
+
+            }
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/tasks/" +
+                        encodeURIComponent(
+                            currentTaskId
+                        )
+                    );
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to load task."
+                    );
+
+                }
+
+
+                updateTaskStatus(data);
+
+                setConnection(true);
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Task status error:",
+                    error
+                );
+
+
+                if (
+                    String(
+                        error.message
+                    ).includes("404")
+                ) {
+
+                    showError(
+                        "Task is no longer available in the current server state."
+                    );
+
+                    stopPolling();
+
+                }
+
+            }
+
+        }
+
+
+        /* =========================================================
+           UPDATE TASK UI
+        ========================================================= */
+
+        function updateTaskStatus(data) {
+
+            const status =
+                String(
+                    data.status ||
+                    "queued"
+                ).toLowerCase();
+
+            const progress =
+                Math.max(
+                    0,
+                    Math.min(
+                        100,
+                        Number(
+                            data.progress || 0
+                        )
+                    )
+                );
+
+            document.getElementById("task-title").textContent =
+                data.task || "Autonomous Task";
+
+            document.getElementById("task-id").textContent =
+                "Task ID: " + data.task_id;
+
+            document.getElementById("task-phase").textContent =
+                formatPhase(data.phase);
+
+            document.getElementById("task-progress").textContent =
+                progress + "%";
+
+            document.getElementById("progress-bar").style.width =
+                progress + "%";
+
+            const badge =
+                document.getElementById("task-badge");
+
+            badge.textContent =
+                status.toUpperCase();
+
+            badge.className =
+                "status-badge " + status;
+
+            updateMetrics(data);
+            updateTaskControls(data);
+            updateTaskRuntime(data);
+
+            renderLogs(data.logs || []);
+            renderResult(data.result);
+
+            if (data.error) {
+                showError(data.error);
+            } else {
+                showError("");
+            }
+
+            if (
+                status === "completed" ||
+                status === "failed" ||
+                status === "cancelled" ||
+                status === "interrupted"
+            ) {
+                stopPolling();
+                loadProjects();
+                loadTasks();
+            }
+        }
+
+
+        /* =========================================================
+           TASK CONTROL
+        ========================================================= */
+
+        function updateTaskControls(data) {
+
+            const status =
+                String(data.status || "queued").toLowerCase();
+
+            const cancelButton =
+                document.getElementById("cancel-task-button");
+
+            const retryButton =
+                document.getElementById("retry-task-button");
+
+            if (!cancelButton || !retryButton) {
+                return;
+            }
+
+            const active =
+                status === "queued" ||
+                status === "running";
+
+            const retryable =
+                status === "failed" ||
+                status === "cancelled" ||
+                status === "interrupted";
+
+            cancelButton.style.display =
+                active ? "inline-block" : "none";
+
+            retryButton.style.display =
+                retryable ? "inline-block" : "none";
+
+            cancelButton.disabled =
+                Boolean(data.cancel_requested);
+
+            cancelButton.textContent =
+                data.cancel_requested
+                    ? "Cancelling..."
+                    : "Cancel";
+        }
+
+
+        function updateTaskRuntime(data) {
+
+            const element =
+                document.getElementById("task-runtime");
+
+            if (!element) {
+                return;
+            }
+
+            if (
+                data.duration_seconds !== null &&
+                data.duration_seconds !== undefined
+            ) {
+                element.textContent =
+                    "Duration: " +
+                    Number(data.duration_seconds).toFixed(2) +
+                    "s";
+                return;
+            }
+
+            if (data.started_at) {
+                element.textContent = "Running...";
+                return;
+            }
+
+            element.textContent = "";
+        }
+
+
+        async function cancelCurrentTask() {
+
+            if (!currentTaskId) {
+                return;
+            }
+
+            if (!confirm("Cancel this task?")) {
+                return;
+            }
+
+            const button =
+                document.getElementById("cancel-task-button");
+
+            button.disabled = true;
+            button.textContent = "Cancelling...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/tasks/" +
+                        encodeURIComponent(currentTaskId) +
+                        "/cancel",
+                        { method: "POST" }
+                    );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Unable to cancel task."
+                    );
+                }
+
+                await refreshTask();
+                await loadTasks();
+
+            }
+            catch (error) {
+
+                alert(
+                    "Cancellation failed:\n\n" +
+                    error.message
+                );
+
+                button.disabled = false;
+                button.textContent = "Cancel";
+            }
+        }
+
+
+        async function retryCurrentTask() {
+
+            if (!currentTaskId) {
+                return;
+            }
+
+            const button =
+                document.getElementById("retry-task-button");
+
+            button.disabled = true;
+            button.textContent = "Retrying...";
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/tasks/" +
+                        encodeURIComponent(currentTaskId) +
+                        "/retry",
+                        { method: "POST" }
+                    );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Unable to retry task."
+                    );
+                }
+
+                currentTaskId = data.task_id;
+
+                document.getElementById("task-status").style.display =
+                    "block";
+
+                document.getElementById("execution-area").style.display =
+                    "grid";
+
+                document.getElementById("task-result").textContent =
+                    "Retry started...";
+
+                startPolling();
+
+                await refreshTask();
+                await loadTasks();
+
+            }
+            catch (error) {
+
+                alert(
+                    "Retry failed:\n\n" +
+                    error.message
+                );
+
+                button.disabled = false;
+                button.textContent = "Retry";
+            }
+        }
+
+
+        /* =========================================================
+           FORMAT PHASE
+        ========================================================= */
+
+        function formatPhase(phase) {
+
+            if (!phase) {
+
+                return "Waiting";
+
+            }
+
+
+            return String(phase)
+
+                .replaceAll(
+                    "_",
+                    " "
+                )
+
+                .replace(
+                    /\b\w/g,
+
+                    char =>
+                        char.toUpperCase()
+                );
+
+        }
+
+
+        /* =========================================================
+           METRICS
+        ========================================================= */
+
+        function updateMetrics(data) {
+
+            const result =
+                data.result || {};
+
+
+            const tests =
+                result.test_result || {};
+
+
+            const application =
+                result.run_result || {};
+
+
+            const gate =
+                result.quality_gate || {};
+
+
+            setMetric(
+
+                "metric-tests",
+
+                result.tests_passed === true
+
+                    ? "PASS"
+
+                    : result.tests_passed === false
+
+                        ? "FAIL"
+
+                        : tests.passed !== undefined
+
+                            ? (
+                                tests.passed
+                                    ? "PASS"
+                                    : "FAIL"
                             )
-                                ? project.files.length
-                                : 0
-                        );
+
+                            : "—"
+
+            );
 
 
-                    const item =
-                        document.createElement(
-                            "button"
-                        );
+            setMetric(
+
+                "metric-app",
+
+                result.application_passed === true
+
+                    ? "PASS"
+
+                    : result.application_passed === false
+
+                        ? "FAIL"
+
+                        : application.success !== undefined
+
+                            ? (
+                                application.success
+                                    ? "PASS"
+                                    : "FAIL"
+                            )
+
+                            : "—"
+
+            );
 
 
-                    item.className =
-                        "project-item";
+            document
+                .getElementById(
+                    "metric-repairs"
+                )
+                .textContent =
+                result.repair_attempts ??
+                "—";
 
 
-                    item.onclick =
-                        () =>
+            setMetric(
+
+                "metric-quality",
+
+                gate.passed === true
+
+                    ? "PASS"
+
+                    : gate.passed === false
+
+                        ? "FAIL"
+
+                        : "—"
+
+            );
+
+        }
+
+
+        /* =========================================================
+           LOGS
+        ========================================================= */
+
+        function renderLogs(logs) {
+
+            const container =
+                document.getElementById(
+                    "live-logs"
+                );
+
+
+            if (
+                !logs ||
+                !logs.length
+            ) {
+
+                container.textContent =
+                    "Waiting for agent...";
+
+                return;
+
+            }
+
+
+            container.innerHTML =
+
+                logs
+
+                    .map(
+
+                        line =>
+
+                            `<div class="log-line">${escapeHtml(line)}</div>`
+
+                    )
+
+                    .join("");
+
+
+            container.scrollTop =
+                container.scrollHeight;
+
+        }
+
+
+        /* =========================================================
+           RESULT
+        ========================================================= */
+
+        function renderResult(result) {
+
+            const container =
+                document.getElementById(
+                    "task-result"
+                );
+
+
+            if (!result) {
+
+                container.textContent =
+                    "Waiting for completion...";
+
+                return;
+
+            }
+
+
+            const summary = {
+
+                success:
+                    result.success,
+
+                project:
+                    result.workspace_name ||
+                    result.project_name,
+
+                files:
+                    result.files,
+
+                tests_passed:
+                    result.tests_passed,
+
+                application_passed:
+                    result.application_passed,
+
+                repair_attempts:
+                    result.repair_attempts,
+
+                quality_gate:
+                    result.quality_gate?.passed,
+
+                zip:
+                    result.zip_file
+
+            };
+
+
+            container.textContent =
+                JSON.stringify(
+                    summary,
+                    null,
+                    2
+                );
+
+        }
+
+
+        /* =========================================================
+           POLLING
+        ========================================================= */
+
+        function startPolling() {
+
+            stopPolling();
+
+
+            pollingTimer =
+                setInterval(
+
+                    refreshTask,
+
+                    900
+
+                );
+
+        }
+
+
+        function stopPolling() {
+
+            if (pollingTimer) {
+
+                clearInterval(
+                    pollingTimer
+                );
+
+                pollingTimer = null;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           PROJECTS
+        ========================================================= */
+
+        async function loadProjects() {
+
+            const container =
+                document.getElementById(
+                    "projects"
+                );
+
+
+            const count =
+                document.getElementById(
+                    "project-count"
+                );
+
+
+            try {
+
+                const response =
+                    await fetch(
+                        "/projects"
+                    );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        "HTTP " +
+                        response.status
+                    );
+
+                }
+
+
+                const data =
+                    await response.json();
+
+
+                const projects =
+                    Array.isArray(data)
+
+                        ? data
+
+                        : data.projects || [];
+
+
+                count.textContent =
+
+                    projects.length +
+
+                    (
+                        projects.length === 1
+
+                            ? " project"
+
+                            : " projects"
+                    );
+
+
+                container.innerHTML = "";
+
+
+                if (!projects.length) {
+
+                    container.innerHTML =
+                        '<div class="empty">No projects yet.</div>';
+
+                    return;
+
+                }
+
+
+                projects.forEach(
+                    project => {
+
+                        const workspace =
+                            getProjectWorkspace(
+                                project
+                            );
+
+
+                        const files =
+                            project.file_count ??
+
+                            (
+                                Array.isArray(
+                                    project.files
+                                )
+
+                                    ? project.files.length
+
+                                    : 0
+                            );
+
+
+                        const item =
+                            document.createElement(
+                                "button"
+                            );
+
+
+                        item.className =
+                            "project-item";
+
+
+                        item.onclick = () =>
                             openProject(
                                 workspace
                             );
 
 
-                    item.innerHTML = `
+                        item.innerHTML = `
 
                         <div class="project-name">
+
                             ${escapeHtml(
-                                projectName(
-                                    project
-                                )
-                            )}
+                            projectName(
+                                project
+                            )
+                        )}
+
                         </div>
 
                         <div class="project-meta">
+
                             ${files} files
+
                         </div>
 
                     `;
 
 
-                    container.appendChild(
-                        item
-                    );
-
-                }
-            );
-
-        }
-        catch (error) {
-
-            container.innerHTML =
-                '<div class="empty">Unable to load projects.</div>';
-
-            count.textContent =
-                "Unavailable";
-
-            console.error(
-                error
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       RECENT TASKS
-    ======================================================== */
-
-    async function loadTasks() {
-
-        const container =
-            document.getElementById(
-                "recent-tasks"
-            );
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/tasks?limit=12"
-                );
-
-
-            const data =
-                await response.json();
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.detail ||
-                    "Unable to load tasks."
-                );
-
-            }
-
-
-            const tasks =
-                data.tasks || [];
-
-
-            container.innerHTML = "";
-
-
-            if (!tasks.length) {
-
-                container.innerHTML =
-                    '<div class="empty">No tasks yet.</div>';
-
-                return;
-
-            }
-
-
-            tasks.forEach(
-                task => {
-
-                    const item =
-                        document.createElement(
-                            "div"
+                        container.appendChild(
+                            item
                         );
 
+                    }
+                );
 
-                    item.className =
-                        "recent-item";
+            }
+            catch (error) {
 
+                container.innerHTML =
+                    '<div class="empty">Unable to load projects.</div>';
 
-                    item.onclick =
-                        async () => {
+                count.textContent =
+                    "Unavailable";
 
-                            currentTaskId =
-                                task.task_id;
+                console.error(
+                    error
+                );
 
+            }
 
-                            document
-                                .getElementById(
-                                    "task-status"
-                                )
-                                .style.display =
-                                    "block";
-
-
-                            document
-                                .getElementById(
-                                    "execution-area"
-                                )
-                                .style.display =
-                                    "grid";
+        }
 
 
-                            await refreshTask();
+        /* =========================================================
+           RECENT TASKS
+        ========================================================= */
 
-                            document
-                                .getElementById(
-                                    "home-view"
-                                )
-                                .scrollIntoView({
-                                    behavior:
-                                        "smooth"
-                                });
+        async function loadTasks() {
 
-                        };
+            const container =
+                document.getElementById("recent-tasks");
 
+            try {
+
+                const response =
+                    await fetch("/tasks?limit=12");
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail ||
+                        "Unable to load tasks."
+                    );
+                }
+
+                const tasks =
+                    data.tasks || [];
+
+                container.innerHTML = "";
+
+                if (!tasks.length) {
+                    container.innerHTML =
+                        '<div class="empty">No tasks yet.</div>';
+                    return;
+                }
+
+                tasks.forEach(task => {
+
+                    const item =
+                        document.createElement("div");
+
+                    item.className = "recent-item";
+
+                    item.onclick = async () => {
+
+                        currentTaskId =
+                            task.task_id;
+
+                        document.getElementById(
+                            "task-status"
+                        ).style.display = "block";
+
+                        document.getElementById(
+                            "execution-area"
+                        ).style.display = "grid";
+
+                        await refreshTask();
+
+                        document.getElementById(
+                            "home-view"
+                        ).scrollIntoView({
+                            behavior: "smooth"
+                        });
+
+                        if (
+                            task.status === "queued" ||
+                            task.status === "running"
+                        ) {
+                            startPolling();
+                        }
+                    };
+
+                    const status =
+                        String(
+                            task.status || "unknown"
+                        ).toLowerCase();
+
+                    const statusText =
+                        status === "completed"
+                            ? "Completed"
+                            : status === "failed"
+                                ? "Failed"
+                                : status === "cancelled"
+                                    ? "Cancelled"
+                                    : status === "interrupted"
+                                        ? "Interrupted"
+                                        : status === "running"
+                                            ? "Running"
+                                            : "Queued";
 
                     item.innerHTML = `
-
                         <div>
-
                             <div class="recent-task">
                                 ${escapeHtml(
                                     task.task ||
@@ -2182,126 +2795,119 @@
                             </div>
 
                             <div class="recent-meta">
-                                ${formatPhase(
-                                    task.phase
-                                )}
+                                ${formatPhase(task.phase)}
                                 ·
-                                ${Number(
-                                    task.progress || 0
-                                )}%
+                                ${Number(task.progress || 0)}%
                             </div>
-
                         </div>
 
-                        <div class="recent-status">
-                            ${escapeHtml(
-                                task.status ||
-                                ""
-                            )}
+                        <div
+                            class="recent-status"
+                            title="${escapeHtml(task.task_id)}"
+                        >
+                            ${escapeHtml(statusText)}
                         </div>
-
                     `;
 
+                    container.appendChild(item);
+                });
 
-                    container.appendChild(
-                        item
-                    );
+            }
+            catch (error) {
 
-                }
-            );
+                container.innerHTML =
+                    '<div class="empty">Unable to load tasks.</div>';
 
-        }
-        catch (error) {
-
-            container.innerHTML =
-                '<div class="empty">Unable to load tasks.</div>';
-
-            console.error(
-                error
-            );
-
-        }
-
-    }
-
-
-    /* ========================================================
-       OPEN PROJECT
-    ======================================================== */
-
-    async function openProject(
-        workspace
-    ) {
-
-        if (!workspace) {
-            return;
-        }
-
-
-        currentProject =
-            workspace;
-
-
-        document
-            .getElementById(
-                "home-view"
-            )
-            .style.display =
-                "none";
-
-
-        document
-            .getElementById(
-                "project-view"
-            )
-            .classList.add(
-                "active"
-            );
-
-
-        const container =
-            document.getElementById(
-                "project-detail"
-            );
-
-
-        container.innerHTML =
-            '<div class="empty">Loading project...</div>';
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/projects/" +
-                    encodeURIComponent(
-                        workspace
-                    )
+                console.error(
+                    "Task loading error:",
+                    error
                 );
+            }
+        }
 
 
-            const project =
-                await response.json();
+        /* =========================================================
+           OPEN PROJECT
+        ========================================================= */
 
+        async function openProject(
+            workspace
+        ) {
 
-            if (!response.ok) {
+            if (!workspace) {
 
-                throw new Error(
-                    project.detail ||
-                    "Unable to load project."
-                );
+                return;
 
             }
 
 
-            renderProject(
-                project
-            );
+            currentProject =
+                workspace;
 
-        }
-        catch (error) {
 
-            container.innerHTML = `
+            document
+                .getElementById(
+                    "home-view"
+                )
+                .style.display =
+                "none";
+
+
+            document
+                .getElementById(
+                    "project-view"
+                )
+                .classList.add(
+                    "active"
+                );
+
+
+            const container =
+                document.getElementById(
+                    "project-detail"
+                );
+
+
+            container.innerHTML =
+                '<div class="empty">Loading project...</div>';
+
+
+            try {
+
+                const response =
+                    await fetch(
+
+                        "/projects/" +
+
+                        encodeURIComponent(
+                            workspace
+                        )
+
+                    );
+
+
+                const project =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        project.detail ||
+                        "Unable to load project."
+                    );
+
+                }
+
+
+                renderProject(
+                    project
+                );
+
+            }
+            catch (error) {
+
+                container.innerHTML = `
 
                 <div class="task-panel">
 
@@ -2310,170 +2916,225 @@
                     <br><br>
 
                     ${escapeHtml(
-                        error.message
-                    )}
+                    error.message
+                )}
 
                 </div>
 
             `;
 
+            }
+
         }
 
-    }
+
+        /* =========================================================
+           RENDER PROJECT
+        ========================================================= */
+
+        function renderProject(
+            project
+        ) {
+
+            const container =
+                document.getElementById(
+                    "project-detail"
+                );
 
 
-    /* ========================================================
-       RENDER PROJECT
-    ======================================================== */
-
-    function renderProject(
-        project
-    ) {
-
-        const container =
-            document.getElementById(
-                "project-detail"
-            );
+            const name =
+                projectName(
+                    project
+                );
 
 
-        const name =
-            projectName(
-                project
-            );
+            const workspace =
+                getProjectWorkspace(
+                    project
+                );
 
 
-        const workspace =
-            getProjectWorkspace(
-                project
-            );
+            const files =
+                Array.isArray(
+                    project.files
+                )
+
+                    ? project.files
+
+                    : [];
 
 
-        const files =
-            Array.isArray(
-                project.files
-            )
-                ? project.files
-                : [];
+            const tests =
+                project.test_result ||
+
+                project.result?.test_result ||
+
+                null;
 
 
-        const tests =
-            project.test_result ||
-            project.result?.test_result ||
-            null;
+            const repairs =
+                project.repair_attempts ??
+
+                project.result?.repair_attempts ??
+
+                0;
 
 
-        const repairs =
-            project.repair_attempts ??
-            project.result?.repair_attempts ??
-            0;
+            const repairHistory =
+                project.repair_history ||
+
+                project.result?.repair_history ||
+
+                [];
 
 
-        const repairHistory =
-            project.repair_history ||
-            project.result?.repair_history ||
-            [];
+            const description =
+                project.summary ||
+
+                project.description ||
+
+                "Autonomously generated project.";
 
 
-        const description =
-            project.summary ||
-            project.description ||
-            "Autonomously generated project.";
+            const fileItems =
+
+                files.length
+
+                    ?
+
+                    files
+
+                        .map(
+
+                            file => {
+
+                                const path =
+
+                                    typeof file === "string"
+
+                                        ? file
+
+                                        : file.path;
 
 
-        const fileItems =
-            files.length
-
-                ? files
-                    .map(
-                        file => {
-
-                            const path =
-                                typeof file === "string"
-                                    ? file
-                                    : file.path;
-
-
-                            return `
+                                return `
 
                                 <div
+
                                     class="file-item"
+
                                     data-file="${escapeHtml(path)}"
+
                                     onclick="viewProjectFile('${encodeURIComponent(path)}')"
+
                                 >
+
                                     ${escapeHtml(path)}
+
                                 </div>
 
                             `;
 
-                        }
-                    )
-                    .join("")
+                            }
 
-                : `
+                        )
+
+                        .join("")
+
+                    :
+
+                    `
+
                     <div class="empty">
+
                         No project files.
+
                     </div>
+
                 `;
 
 
-        const repairItems =
-            repairHistory.length
+            const repairItems =
 
-                ? repairHistory
-                    .map(
-                        (
-                            repair,
-                            index
-                        ) => {
+                repairHistory.length
 
-                            const message =
-                                repair.diagnosis ||
-                                repair.error ||
-                                repair.failure ||
-                                repair.message ||
-                                JSON.stringify(
-                                    repair,
-                                    null,
-                                    2
-                                );
+                    ?
+
+                    repairHistory
+
+                        .map(
+
+                            (
+                                repair,
+                                index
+                            ) => {
+
+                                const message =
+
+                                    repair.diagnosis ||
+
+                                    repair.error ||
+
+                                    repair.failure ||
+
+                                    repair.message ||
+
+                                    JSON.stringify(
+                                        repair,
+                                        null,
+                                        2
+                                    );
 
 
-                            return `
+                                return `
 
                                 <div class="repair-item">
 
                                     <div class="repair-label">
+
                                         Repair ${index + 1}
+
                                     </div>
 
+
                                     <div class="repair-message">
+
                                         ${escapeHtml(
-                                            message
-                                        )}
+                                    message
+                                )}
+
                                     </div>
 
                                 </div>
 
                             `;
 
-                        }
-                    )
-                    .join("")
+                            }
 
-                : `
+                        )
+
+                        .join("")
+
+                    :
+
+                    `
+
                     <div class="empty">
+
                         No repairs required.
+
                     </div>
+
                 `;
 
 
-        const testsPassed =
-            resultPassed(
-                tests
-            );
+            const testsPassed =
+                resultPassed(
+                    tests
+                );
 
 
-        container.innerHTML = `
+            container.innerHTML = `
 
             <div class="project-header">
 
@@ -2482,13 +3143,18 @@
                     <div>
 
                         <h1 class="project-title">
+
                             ${escapeHtml(name)}
+
                         </h1>
 
+
                         <p class="project-description">
+
                             ${escapeHtml(
-                                description
-                            )}
+                description
+            )}
+
                         </p>
 
                     </div>
@@ -2497,17 +3163,28 @@
                     <div class="project-buttons">
 
                         <button
+
                             class="small-button download"
+
                             onclick="downloadProject('${encodeURIComponent(workspace)}')"
+
                         >
+
                             ZIP
+
                         </button>
 
+
                         <button
+
                             class="small-button delete"
+
                             onclick="deleteProject('${encodeURIComponent(workspace)}')"
+
                         >
+
                             Delete
+
                         </button>
 
                     </div>
@@ -2517,14 +3194,19 @@
 
                 <div class="project-stats">
 
+
                     <div class="project-stat">
 
                         <div class="project-stat-label">
+
                             Files
+
                         </div>
 
                         <div class="project-stat-value">
+
                             ${files.length}
+
                         </div>
 
                     </div>
@@ -2533,25 +3215,35 @@
                     <div class="project-stat">
 
                         <div class="project-stat-label">
+
                             Tests
+
                         </div>
 
                         <div
-                            class="project-stat-value ${
-                                testsPassed
-                                    ? "pass"
-                                    : ""
-                            }"
+
+                            class="project-stat-value ${testsPassed
+                    ? "pass"
+                    : ""
+                }"
+
                         >
-                            ${
-                                tests
-                                    ? (
-                                        testsPassed
-                                            ? "PASS"
-                                            : "FAIL"
-                                    )
-                                    : "N/A"
-                            }
+
+                            ${tests
+
+                    ?
+
+                    (
+                        testsPassed
+                            ? "PASS"
+                            : "FAIL"
+                    )
+
+                    :
+
+                    "N/A"
+                }
+
                         </div>
 
                     </div>
@@ -2560,11 +3252,15 @@
                     <div class="project-stat">
 
                         <div class="project-stat-label">
+
                             Repairs
+
                         </div>
 
                         <div class="project-stat-value">
+
                             ${repairs}
+
                         </div>
 
                     </div>
@@ -2576,8 +3272,11 @@
 
             <div class="file-viewer">
 
+
                 <div class="file-list">
+
                     ${fileItems}
+
                 </div>
 
 
@@ -2590,9 +3289,8 @@
                         Select a file
                     </div>
 
-                    <pre id="code">
-Select a project file to preview its contents.
-                    </pre>
+
+                    <pre id="code">Select a project file to preview its contents.</pre>
 
                 </div>
 
@@ -2602,8 +3300,11 @@ Select a project file to preview its contents.
             <div class="repair-section">
 
                 <div class="repair-title">
+
                     REPAIR HISTORY
+
                 </div>
+
 
                 ${repairItems}
 
@@ -2612,275 +3313,390 @@ Select a project file to preview its contents.
         `;
 
 
-        if (files.length) {
+            if (files.length) {
 
-            const first =
-                typeof files[0] === "string"
-                    ? files[0]
-                    : files[0].path;
+                const first =
 
+                    typeof files[0] === "string"
 
-            viewProjectFile(
-                encodeURIComponent(
-                    first
-                )
-            );
+                        ? files[0]
 
-        }
-
-    }
+                        : files[0].path;
 
 
-    /* ========================================================
-       VIEW PROJECT FILE
-    ======================================================== */
-
-    async function viewProjectFile(
-        encodedPath
-    ) {
-
-        const path =
-            decodeURIComponent(
-                encodedPath
-            );
-
-
-        if (!currentProject) {
-            return;
-        }
-
-
-        const code =
-            document.getElementById(
-                "code"
-            );
-
-
-        const title =
-            document.getElementById(
-                "code-title"
-            );
-
-
-        title.textContent =
-            path;
-
-
-        code.textContent =
-            "Loading...";
-
-
-        try {
-
-            const url =
-                "/projects/" +
-                encodeURIComponent(
-                    currentProject
-                ) +
-                "/file/" +
-                path
-                    .split("/")
-                    .map(
-                        encodeURIComponent
+                viewProjectFile(
+                    encodeURIComponent(
+                        first
                     )
-                    .join("/");
-
-
-            const response =
-                await fetch(
-                    url
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "HTTP " +
-                    response.status
                 );
 
             }
 
-
-            code.textContent =
-                await response.text();
-
-
-            document
-                .querySelectorAll(
-                    ".file-item"
-                )
-                .forEach(
-                    item => {
-
-                        item.classList.toggle(
-                            "active",
-                            item.dataset.file ===
-                                path
-                        );
-
-                    }
-                );
-
-        }
-        catch (error) {
-
-            title.textContent =
-                "Unable to load file";
-
-            code.textContent =
-                error.message;
-
         }
 
-    }
 
+        /* =========================================================
+           VIEW PROJECT FILE
+        ========================================================= */
 
-    /* ========================================================
-       DOWNLOAD
-    ======================================================== */
-
-    function downloadProject(
-        encodedWorkspace
-    ) {
-
-        const workspace =
-            decodeURIComponent(
-                encodedWorkspace
-            );
-
-
-        window.location.href =
-            "/download-project/" +
-            encodeURIComponent(
-                workspace
-            );
-
-    }
-
-
-    /* ========================================================
-       DELETE PROJECT
-    ======================================================== */
-
-    async function deleteProject(
-        encodedWorkspace
-    ) {
-
-        const workspace =
-            decodeURIComponent(
-                encodedWorkspace
-            );
-
-
-        if (
-            !confirm(
-                `Delete "${workspace}"?\n\nThe project and ZIP package will be removed.`
-            )
+        async function viewProjectFile(
+            encodedPath
         ) {
 
-            return;
-
-        }
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/projects/" +
-                    encodeURIComponent(
-                        workspace
-                    ),
-                    {
-                        method:
-                            "DELETE"
-                    }
+            const path =
+                decodeURIComponent(
+                    encodedPath
                 );
 
 
-            const data =
-                await response.json()
-                    .catch(
-                        () => ({})
+            if (!currentProject) {
+
+                return;
+
+            }
+
+
+            const code =
+                document.getElementById(
+                    "code"
+                );
+
+
+            const title =
+                document.getElementById(
+                    "code-title"
+                );
+
+
+            title.textContent =
+                path;
+
+
+            code.textContent =
+                "Loading...";
+
+
+            try {
+
+                const url =
+
+                    "/projects/" +
+
+                    encodeURIComponent(
+                        currentProject
+                    ) +
+
+                    "/file/" +
+
+                    path
+
+                        .split("/")
+
+                        .map(
+                            encodeURIComponent
+                        )
+
+                        .join("/");
+
+
+                const response =
+                    await fetch(
+                        url
                     );
 
 
-            if (!response.ok) {
+                if (!response.ok) {
 
-                throw new Error(
-                    data.detail ||
-                    "Unable to delete project."
+                    throw new Error(
+                        "HTTP " +
+                        response.status
+                    );
+
+                }
+
+
+                code.textContent =
+                    await response.text();
+
+
+                document
+                    .querySelectorAll(
+                        ".file-item"
+                    )
+                    .forEach(
+                        item => {
+
+                            item.classList.toggle(
+
+                                "active",
+
+                                item.dataset.file ===
+                                path
+
+                            );
+
+                        }
+                    );
+
+            }
+            catch (error) {
+
+                title.textContent =
+                    "Unable to load file";
+
+
+                code.textContent =
+                    error.message;
+
+            }
+
+        }
+
+
+        /* =========================================================
+           DOWNLOAD PROJECT
+        ========================================================= */
+
+        function downloadProject(
+            encodedWorkspace
+        ) {
+
+            const workspace =
+                decodeURIComponent(
+                    encodedWorkspace
                 );
+
+
+            window.location.href =
+
+                "/download-project/" +
+
+                encodeURIComponent(
+                    workspace
+                );
+
+        }
+
+
+        /* =========================================================
+           DELETE PROJECT
+        ========================================================= */
+
+        async function deleteProject(
+            encodedWorkspace
+        ) {
+
+            const workspace =
+                decodeURIComponent(
+                    encodedWorkspace
+                );
+
+
+            if (
+
+                !confirm(
+
+                    `Delete "${workspace}"?\n\n` +
+
+                    `The project and ZIP package will be removed.`
+
+                )
+
+            ) {
+
+                return;
 
             }
 
 
-            showHome();
+            try {
 
-            await loadProjects();
+                const response =
+                    await fetch(
+
+                        "/projects/" +
+
+                        encodeURIComponent(
+                            workspace
+                        ),
+
+                        {
+                            method:
+                                "DELETE"
+                        }
+
+                    );
+
+
+                const data =
+                    await response
+                        .json()
+                        .catch(
+                            () => ({})
+                        );
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.detail ||
+                        "Unable to delete project."
+                    );
+
+                }
+
+
+                showHome();
+
+
+                await loadProjects();
+
+            }
+            catch (error) {
+
+                alert(
+
+                    "Delete failed:\n\n" +
+
+                    error.message
+
+                );
+
+            }
 
         }
-        catch (error) {
-
-            alert(
-                "Delete failed:\n\n" +
-                error.message
-            );
-
-        }
-
-    }
 
 
-    /* ========================================================
-       HOME
-    ======================================================== */
+        /* =========================================================
+           HOME
+        ========================================================= */
 
-    function showHome() {
+        function showHome() {
 
-        currentProject = null;
-
-
-        document
-            .getElementById(
-                "project-view"
-            )
-            .classList.remove(
-                "active"
-            );
+            currentProject = null;
 
 
-        document
-            .getElementById(
-                "home-view"
-            )
-            .style.display =
+            document
+                .getElementById(
+                    "project-view"
+                )
+                .classList.remove(
+                    "active"
+                );
+
+
+            document
+                .getElementById(
+                    "home-view"
+                )
+                .style.display =
                 "block";
 
 
-        loadProjects();
+            loadProjects();
 
-    }
-
-
-    /* ========================================================
-       INITIALIZATION
-    ======================================================== */
-
-    async function init() {
-
-        await Promise.all([
-            loadProjects(),
-            loadTasks()
-        ]);
-
-    }
+        }
 
 
-    init();
+        /* =========================================================
+           KEYBOARD SHORTCUT
+        ========================================================= */
 
-</script>
+        document
+            .getElementById("task-input")
+            .addEventListener(
+                "keydown",
+                event => {
+
+                    if (
+
+                        (event.ctrlKey ||
+                            event.metaKey) &&
+
+                        event.key === "Enter"
+
+                    ) {
+
+                        event.preventDefault();
+
+                        startTask();
+
+                    }
+
+                }
+            );
+
+
+        /* =========================================================
+           INITIALIZATION
+        ========================================================= */
+
+        async function init() {
+
+            await Promise.all([
+                loadProjects(),
+                loadTasks()
+            ]);
+
+            startHealthPolling();
+
+            try {
+
+                const response =
+                    await fetch("/tasks?limit=1");
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const data =
+                    await response.json();
+
+                const tasks =
+                    data.tasks || [];
+
+                if (!tasks.length) {
+                    return;
+                }
+
+                const latest =
+                    tasks[0];
+
+                currentTaskId =
+                    latest.task_id;
+
+                document.getElementById(
+                    "task-status"
+                ).style.display = "block";
+
+                document.getElementById(
+                    "execution-area"
+                ).style.display = "grid";
+
+                await refreshTask();
+
+                if (
+                    latest.status === "queued" ||
+                    latest.status === "running"
+                ) {
+                    startPolling();
+                }
+
+            }
+            catch (error) {
+
+                console.error(
+                    "Unable to restore latest task:",
+                    error
+                );
+            }
+        }
+
+
+        init();
+
+    </script>
 
 </body>
+
 </html>
