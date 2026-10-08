@@ -8,7 +8,8 @@ import zipfile
 from pathlib import Path
 
 from typing import Dict, Optional, Any
-
+from agent.quality_gate import run_quality_gate
+from agent.failure_analyzer import analyze_failure
 from agent.logger import log
 
 from agent.project_repair import repair_project
@@ -1103,42 +1104,28 @@ def _select_repair_project(
     return selected
 
 def _build_repair_failure(
-
     failure: Dict[str, Any],
-
 ) -> Dict[str, Any]:
 
     return {
-
         "phase": failure.get(
-
             "phase",
-
             "unknown",
-
         ),
-
         "summary": _normalize_failure_text(
-
             failure
-
         ),
-
+        "diagnosis": failure.get(
+            "diagnosis",
+            {},
+        ),
         "behavior_specification": (
-
             failure.get(
-
                 "behavior_specification",
-
                 {},
-
             )
-
         ),
-
     }
-
-# ============================================================
 
 # REPAIR ENGINE
 
@@ -1907,21 +1894,27 @@ def execute_project(
                 break
 
             repair_attempts += 1
+            diagnosis = analyze_failure(
+                test_result=test_result,
+                run_result=run_result,
+                phase="tests",
+                project=project,
+            )
+
+            log(
+                "🔎 Failure diagnosis: "
+                f"{diagnosis.get('category', 'unknown')} — "
+                f"{diagnosis.get('summary', '')}"
+            )
 
             failure = {
-
                 "phase": "tests",
-
                 "test_result": test_result,
-
                 "run_result": run_result,
-
+                "diagnosis": diagnosis,
                 "behavior_specification": (
-
                     behavior_specification
-
                 ),
-
             }
 
             project, patch = _repair_project(
@@ -1975,7 +1968,7 @@ def execute_project(
                     and item.get("path")
 
                 ],
-
+                "diagnosis": diagnosis,
             })
 
     else:
@@ -2113,21 +2106,27 @@ def execute_project(
                 break
 
             repair_attempts += 1
+            diagnosis = analyze_failure(
+                test_result=test_result,
+                run_result=run_result,
+                phase="application",
+                project=project,
+            )
+
+            log(
+                "🔎 Failure diagnosis: "
+                f"{diagnosis.get('category', 'unknown')} — "
+                f"{diagnosis.get('summary', '')}"
+            )
 
             failure = {
-
                 "phase": "application",
-
                 "test_result": test_result,
-
                 "run_result": run_result,
-
+                "diagnosis": diagnosis,
                 "behavior_specification": (
-
                     behavior_specification
-
                 ),
-
             }
 
             project, patch = _repair_project(
@@ -2176,6 +2175,7 @@ def execute_project(
                 ),
 
                 "files_changed": changed_files,
+                "diagnosis": diagnosis,
             })
 
             # ------------------------------------------------
@@ -2255,21 +2255,51 @@ def execute_project(
         success = tests_success
 
     # ========================================================
-    # CLEANUP
+    # AUTONOMOUS QUALITY GATE
     # ========================================================
 
-    _cleanup_generated_artifacts(
-        workspace
-    )
+    # Evaluate the raw workspace before cleanup so the gate can detect
+    # caches, package collisions, syntax/import defects and other issues.
+    try:
+        quality_gate = run_quality_gate(
+            workspace=workspace,
+            plan=plan,
+            test_result=test_result,
+            run_result=run_result,
+            behavior_specification=behavior_specification,
+        )
+    except Exception as exc:
+        log(f"❌ Quality gate crashed: {exc}")
+        quality_gate = {
+            "quality_gate": "v1",
+            "passed": False,
+            "tests_passed": tests_success,
+            "application_passed": application_success if run_command else True,
+            "failed_checks": [f"Quality gate execution error: {exc}"],
+            "checks": {},
+            "warnings": [],
+        }
+
+    if quality_gate.get("passed"):
+        log("🛡️ AUTONOMOUS QUALITY GATE PASSED")
+    else:
+        log("❌ AUTONOMOUS QUALITY GATE FAILED")
+        for failed_check in quality_gate.get("failed_checks", []):
+            log(f"   ❌ {failed_check}")
+
+    success = bool(success and quality_gate.get("passed", False))
+
+    # ========================================================
+    # FINAL CLEANUP
+    # ========================================================
+
+    _cleanup_generated_artifacts(workspace)
 
     # ========================================================
     # ZIP
     # ========================================================
 
-    zip_path = create_project_zip(
-        workspace
-
-    )
+    zip_path = create_project_zip(workspace)
 
     final_files = sorted(
         _read_project(
@@ -2337,6 +2367,7 @@ def execute_project(
 
         "repair_attempts": repair_attempts,
         "repair_history": repair_history,
+        "quality_gate": quality_gate,
         "zip_file": zip_path.name,
         "zip_path": str(
             zip_path

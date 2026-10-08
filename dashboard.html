@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>AutoDev Agent</title>
 
     <style>
@@ -11,381 +12,929 @@
         }
 
         :root {
-            --bg: #0f172a;
-            --panel: #111827;
-            --panel-2: #1e293b;
-            --code: #020617;
-            --border: #334155;
-            --text: #e2e8f0;
-            --muted: #94a3b8;
-            --blue: #2563eb;
-            --blue-hover: #1d4ed8;
-            --cyan: #38bdf8;
-            --red: #dc2626;
-            --purple: #7c3aed;
-            --green-bg: #14532d;
-            --green-text: #86efac;
-            --red-bg: #7f1d1d;
-            --red-text: #fca5a5;
-            --yellow-bg: #713f12;
-            --yellow-text: #fde68a;
+            --bg: #080b12;
+            --surface: #0f141d;
+            --surface-2: #141b26;
+            --surface-3: #192231;
+
+            --border: #252f3e;
+
+            --text: #edf2f7;
+            --muted: #8b98aa;
+
+            --accent: #4f8cff;
+            --accent-hover: #6a9dff;
+
+            --success: #35d07f;
+            --warning: #f2c14e;
+            --danger: #ff647c;
+
+            --code: #070a0f;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
         }
 
         body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
             background: var(--bg);
             color: var(--text);
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
         }
 
-        header {
-            padding: 20px 28px;
-            background: var(--panel);
-            border-bottom: 1px solid var(--border);
-        }
-
-        header h1 {
-            margin: 0;
-            color: var(--cyan);
-            font-size: 25px;
-        }
-
-        header p {
-            margin: 6px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .layout {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            min-height: calc(100vh - 92px);
-        }
-
-        .sidebar {
-            padding: 18px;
-            background: var(--panel);
-            border-right: 1px solid var(--border);
-            overflow-y: auto;
-        }
-
-        .main {
-            padding: 22px;
-            min-width: 0;
-            overflow-y: auto;
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 19px;
+        button,
+        textarea {
+            font: inherit;
         }
 
         button {
             border: 0;
-            border-radius: 6px;
-            padding: 8px 11px;
-            background: var(--blue);
-            color: white;
             cursor: pointer;
-            font-size: 13px;
         }
 
-        button:hover {
-            background: var(--blue-hover);
+        /* =========================================================
+           HEADER
+        ========================================================= */
+
+        header {
+            height: 68px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 26px;
+
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
         }
 
-        button.secondary {
-            background: #475569;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
-        button.secondary:hover {
-            background: #64748b;
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 9px;
+
+            background: #162748;
+            border: 1px solid #294a82;
+
+            font-size: 18px;
         }
 
-        button.danger {
-            background: var(--red);
+        .brand-title {
+            margin: 0;
+
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
         }
 
-        button.danger:hover {
-            background: #b91c1c;
+        .brand-subtitle {
+            margin: 2px 0 0;
+
+            color: var(--muted);
+            font-size: 11px;
         }
 
-        button.zip {
-            background: var(--purple);
+        .agent-state {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+
+            color: var(--success);
+            font-size: 11px;
+            font-weight: 700;
         }
 
-        button.zip:hover {
-            background: #6d28d9;
+        .agent-dot {
+            width: 7px;
+            height: 7px;
+
+            border-radius: 50%;
+            background: var(--success);
         }
+
+        /* =========================================================
+           LAYOUT
+        ========================================================= */
+
+        .layout {
+            display: grid;
+            grid-template-columns: 270px minmax(0, 1fr);
+
+            min-height: calc(100vh - 68px);
+        }
+
+        .sidebar {
+            padding: 18px;
+
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+
+            overflow-y: auto;
+        }
+
+        .main {
+            min-width: 0;
+            padding: 22px 24px;
+
+            overflow-y: auto;
+        }
+
+        /* =========================================================
+           COMMON
+        ========================================================= */
 
         .section {
-            margin-bottom: 26px;
+            margin-bottom: 24px;
         }
 
         .section-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 8px;
+
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            margin: 0;
+
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .count {
-            color: var(--muted);
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
+            margin-top: 3px;
 
-        .card {
-            background: var(--panel-2);
-            border: 1px solid var(--border);
-            border-radius: 9px;
-            padding: 13px;
-            margin-bottom: 10px;
-        }
-
-        .card:hover {
-            border-color: #475569;
-        }
-
-        .card-title {
-            font-weight: 700;
-            margin-bottom: 6px;
-            word-break: break-word;
-        }
-
-        .card-meta {
-            color: var(--muted);
-            font-size: 12px;
-            margin-bottom: 9px;
-            line-height: 1.5;
-        }
-
-        .actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .actions button {
-            margin: 0;
-        }
-
-        .status {
-            padding: 13px;
-            margin-bottom: 18px;
-            background: var(--panel-2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .status.error {
-            border-color: #991b1b;
-            color: var(--red-text);
-        }
-
-        .overview {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-
-        .stat {
-            padding: 12px;
-            background: var(--panel-2);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-        }
-
-        .stat-label {
             color: var(--muted);
             font-size: 10px;
+        }
+
+        .icon-button {
+            width: 28px;
+            height: 28px;
+
+            display: grid;
+            place-items: center;
+
+            border-radius: 7px;
+
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .icon-button:hover {
+            color: var(--text);
+            border-color: #3a4b63;
+        }
+
+        /* =========================================================
+           SIDEBAR PROJECTS
+        ========================================================= */
+
+        .project-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .project-item {
+            width: 100%;
+
+            padding: 10px 11px;
+
+            border-radius: 8px;
+
+            background: transparent;
+            border: 1px solid transparent;
+
+            color: var(--text);
+
+            text-align: left;
+
+            transition:
+                background 0.15s,
+                border-color 0.15s;
+        }
+
+        .project-item:hover {
+            background: var(--surface-2);
+            border-color: var(--border);
+        }
+
+        .project-item.active {
+            background: #14213a;
+            border-color: #2b4f87;
+        }
+
+        .project-name {
+            overflow: hidden;
+
+            color: #dce5f0;
+
+            font-size: 12px;
+            font-weight: 650;
+
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .project-meta {
+            margin-top: 4px;
+
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .empty {
+            padding: 20px 8px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            text-align: center;
+        }
+
+        /* =========================================================
+           HOME
+        ========================================================= */
+
+        .home {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            margin-bottom: 18px;
+        }
+
+        .hero h1 {
+            margin: 0;
+
+            font-size: 25px;
+            font-weight: 750;
+            letter-spacing: -0.6px;
+        }
+
+        .hero p {
+            margin: 6px 0 0;
+
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* =========================================================
+           TASK INPUT
+        ========================================================= */
+
+        .task-panel {
+            padding: 17px;
+
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .task-label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 650;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 105px;
+
+            padding: 12px;
+
+            resize: vertical;
+
+            background: var(--code);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+
+            color: var(--text);
+
+            outline: none;
+
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        textarea:focus {
+            border-color: #386bc0;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-top: 10px;
+        }
+
+        .task-hint {
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .primary-button {
+            padding: 9px 15px;
+
+            border-radius: 7px;
+
+            background: var(--accent);
+            color: white;
+
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .primary-button:hover {
+            background: var(--accent-hover);
+        }
+
+        .primary-button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* =========================================================
+           ACTIVE TASK
+        ========================================================= */
+
+        .task-status {
+            margin-top: 16px;
+            padding: 16px;
+
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .task-status-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            gap: 20px;
+        }
+
+        .task-status-title {
+            margin: 0;
+
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .task-id {
+            margin-top: 4px;
+
+            color: var(--muted);
+            font-family: Consolas, monospace;
+            font-size: 10px;
+        }
+
+        .status-badge {
+            padding: 5px 9px;
+
+            border-radius: 999px;
+
+            background: var(--surface-3);
+            border: 1px solid var(--border);
+
+            color: var(--muted);
+
+            font-size: 9px;
+            font-weight: 800;
+
             text-transform: uppercase;
         }
 
-        .stat-value {
-            margin-top: 5px;
-            font-size: 19px;
-            font-weight: bold;
+        .status-badge.running {
+            color: #75cfff;
+            border-color: #27527a;
         }
+
+        .status-badge.completed {
+            color: var(--success);
+            border-color: #235e43;
+        }
+
+        .status-badge.failed {
+            color: var(--danger);
+            border-color: #69303d;
+        }
+
+        .progress-area {
+            margin-top: 14px;
+        }
+
+        .progress-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            margin-bottom: 6px;
+
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 5px;
+
+            overflow: hidden;
+
+            background: #1a2230;
+            border-radius: 999px;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+
+            background: var(--accent);
+
+            border-radius: inherit;
+
+            transition: width 0.3s ease;
+        }
+
+        /* =========================================================
+           TASK METRICS
+        ========================================================= */
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+
+            gap: 8px;
+
+            margin-top: 12px;
+        }
+
+        .metric {
+            padding: 10px;
+
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .metric-label {
+            color: var(--muted);
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            margin-top: 4px;
+
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .pass {
+            color: var(--success);
+        }
+
+        .fail {
+            color: var(--danger);
+        }
+
+        /* =========================================================
+           TASK DETAILS
+        ========================================================= */
+
+        .task-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+
+            gap: 12px;
+
+            margin-top: 16px;
+        }
+
+        .panel {
+            min-width: 0;
+
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .panel-header {
+            padding: 11px 13px;
+
+            border-bottom: 1px solid var(--border);
+
+            color: var(--muted);
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .logs {
+            height: 250px;
+
+            padding: 12px;
+
+            overflow-y: auto;
+
+            background: var(--code);
+
+            font: 11px/1.6 Consolas, monospace;
+        }
+
+        .log-line {
+            color: #b9c5d5;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .result {
+            height: 250px;
+
+            padding: 12px;
+
+            overflow: auto;
+
+            background: var(--code);
+
+            color: #b9c5d5;
+
+            font: 11px/1.55 Consolas, monospace;
+            white-space: pre-wrap;
+        }
+
+        /* =========================================================
+           RECENT TASKS
+        ========================================================= */
+
+        .recent-tasks {
+            margin-top: 16px;
+        }
+
+        .recent-list {
+            max-height: 210px;
+            overflow-y: auto;
+        }
+
+        .recent-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+
+            gap: 10px;
+
+            padding: 10px 12px;
+
+            border-bottom: 1px solid var(--border);
+
+            cursor: pointer;
+        }
+
+        .recent-item:last-child {
+            border-bottom: 0;
+        }
+
+        .recent-item:hover {
+            background: var(--surface-2);
+        }
+
+        .recent-task {
+            overflow: hidden;
+
+            color: #dbe5f1;
+
+            font-size: 11px;
+            font-weight: 600;
+
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .recent-meta {
+            margin-top: 3px;
+
+            color: var(--muted);
+            font-size: 9px;
+        }
+
+        .recent-status {
+            align-self: center;
+
+            color: var(--muted);
+
+            font-size: 9px;
+            font-weight: 800;
+
+            text-transform: uppercase;
+        }
+
+        /* =========================================================
+           PROJECT DETAIL
+        ========================================================= */
 
         .project-view {
             display: none;
+
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
         .project-view.active {
             display: block;
         }
 
-        .project-header {
-            padding: 17px;
-            margin-bottom: 15px;
-            background: var(--panel);
+        .back-button {
+            margin-bottom: 14px;
+
+            padding: 7px 10px;
+
+            border-radius: 7px;
+
+            background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 9px;
-        }
 
-        .project-header h2 {
-            color: var(--cyan);
-            margin-bottom: 7px;
-        }
-
-        .project-header p {
             color: var(--muted);
-            margin: 4px 0;
-            font-size: 13px;
+
+            font-size: 11px;
         }
 
-        .badges {
-            margin-top: 11px;
+        .back-button:hover {
+            color: var(--text);
         }
 
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            margin-right: 4px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: bold;
+        .project-header {
+            padding: 16px;
+
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
         }
 
-        .badge.green {
-            background: var(--green-bg);
-            color: var(--green-text);
-        }
-
-        .badge.red {
-            background: var(--red-bg);
-            color: var(--red-text);
-        }
-
-        .badge.yellow {
-            background: var(--yellow-bg);
-            color: var(--yellow-text);
-        }
-
-        .badge.blue {
-            background: #1e3a8a;
-            color: #93c5fd;
-        }
-
-        .project-actions {
+        .project-header-top {
             display: flex;
-            gap: 7px;
-            flex-wrap: wrap;
-            margin: 14px 0;
+            align-items: flex-start;
+            justify-content: space-between;
+
+            gap: 15px;
         }
+
+        .project-title {
+            margin: 0;
+
+            font-size: 20px;
+            font-weight: 750;
+        }
+
+        .project-description {
+            margin: 5px 0 0;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .project-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .small-button {
+            padding: 7px 10px;
+
+            border-radius: 6px;
+
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+
+            color: #dce5f0;
+
+            font-size: 10px;
+            font-weight: 650;
+        }
+
+        .small-button:hover {
+            border-color: #3b506d;
+        }
+
+        .small-button.download {
+            background: #183663;
+            border-color: #2c5b99;
+        }
+
+        .small-button.delete {
+            color: #ff9cac;
+        }
+
+        .project-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 8px;
+
+            margin-top: 14px;
+        }
+
+        .project-stat {
+            padding: 10px;
+
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .project-stat-label {
+            color: var(--muted);
+            font-size: 9px;
+            text-transform: uppercase;
+        }
+
+        .project-stat-value {
+            margin-top: 4px;
+
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        /* =========================================================
+           FILE VIEWER
+        ========================================================= */
 
         .file-viewer {
             display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 12px;
+            grid-template-columns: 220px minmax(0, 1fr);
+
             min-height: 500px;
+
+            margin-top: 12px;
+
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+
+            overflow: hidden;
         }
 
         .file-list {
             padding: 8px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
+
             overflow-y: auto;
+
+            border-right: 1px solid var(--border);
         }
 
         .file-item {
-            padding: 9px;
-            margin-bottom: 4px;
+            padding: 8px 9px;
+
+            margin-bottom: 2px;
+
             border-radius: 6px;
-            color: #cbd5e1;
-            font-size: 13px;
+
+            color: #bdc9d8;
+
+            font: 10px/1.4 Consolas, monospace;
+
             cursor: pointer;
+
             word-break: break-word;
         }
 
         .file-item:hover {
-            background: var(--panel-2);
+            background: var(--surface-2);
         }
 
         .file-item.active {
-            background: var(--blue);
-            color: white;
+            background: #17335f;
+            color: #dceaff;
         }
 
-        .code {
+        .code-view {
+            min-width: 0;
+
             background: var(--code);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            overflow: auto;
         }
 
         .code-title {
-            padding: 11px 14px;
-            background: var(--panel);
+            padding: 10px 13px;
+
             border-bottom: 1px solid var(--border);
-            color: var(--cyan);
-            font-weight: bold;
-            font-size: 13px;
+
+            color: var(--muted);
+
+            font: 10px Consolas, monospace;
         }
 
         pre {
             margin: 0;
-            padding: 16px;
+
+            padding: 15px;
+
             min-height: 450px;
+
+            overflow: auto;
+
+            color: #d6e1ed;
+
+            font: 12px/1.6 Consolas, monospace;
+
             white-space: pre-wrap;
             word-break: break-word;
-            color: #d1fae5;
-            font: 13px/1.55 Consolas, "Courier New", monospace;
         }
 
-        .repair {
-            border-left: 3px solid #eab308;
-            padding: 9px 12px;
-            margin-bottom: 7px;
-            background: var(--panel-2);
+        /* =========================================================
+           REPAIR HISTORY
+        ========================================================= */
+
+        .repair-section {
+            margin-top: 12px;
+
+            padding: 14px;
+
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .repair-title {
+            margin-bottom: 10px;
+
+            color: var(--muted);
+
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .repair-item {
+            padding: 9px 11px;
+
+            margin-bottom: 6px;
+
+            background: var(--surface-2);
+            border-left: 2px solid var(--warning);
+
             border-radius: 0 6px 6px 0;
         }
 
-        .repair pre {
-            min-height: auto;
-            margin-top: 7px;
-            padding: 8px;
-            font-size: 11px;
-            background: var(--code);
-            border-radius: 5px;
+        .repair-item:last-child {
+            margin-bottom: 0;
         }
 
-        .legacy {
-            max-height: 380px;
-            overflow-y: auto;
+        .repair-label {
+            font-size: 10px;
+            font-weight: 700;
         }
 
-        .empty,
-        .loading {
-            padding: 14px 4px;
+        .repair-message {
+            margin-top: 4px;
+
             color: var(--muted);
-            text-align: center;
-            font-size: 13px;
+
+            font: 10px/1.45 Consolas, monospace;
+
+            white-space: pre-wrap;
         }
 
-        .back {
-            margin-bottom: 14px;
-        }
+        /* =========================================================
+           RESPONSIVE
+        ========================================================= */
 
-        @media (max-width: 1000px) {
-            .layout {
-                grid-template-columns: 270px 1fr;
-            }
-
-            .file-viewer {
-                grid-template-columns: 210px 1fr;
-            }
-
-            .overview {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 760px) {
+        @media (max-width: 900px) {
             .layout {
                 grid-template-columns: 1fr;
             }
@@ -395,12 +944,49 @@
                 border-bottom: 1px solid var(--border);
             }
 
+            .project-list {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .task-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            header {
+                padding: 0 15px;
+            }
+
+            .main {
+                padding: 16px;
+            }
+
+            .project-list {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics,
+            .project-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .file-viewer {
                 grid-template-columns: 1fr;
             }
 
             .file-list {
-                max-height: 200px;
+                max-height: 180px;
+                border-right: 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .task-actions,
+            .task-status-header,
+            .project-header-top {
+                align-items: flex-start;
+                flex-direction: column;
             }
         }
     </style>
@@ -409,77 +995,350 @@
 <body>
 
 <header>
-    <h1>🚀 AutoDev Agent</h1>
-    <p>Autonomous AI software engineer — generate, test, execute and self-heal.</p>
+    <div class="brand">
+        <div class="brand-icon">⚡</div>
+
+        <div>
+            <h1 class="brand-title">AutoDev Agent</h1>
+            <p class="brand-subtitle">
+                Autonomous software engineering
+            </p>
+        </div>
+    </div>
+
+    <div class="agent-state">
+        <span class="agent-dot"></span>
+        READY
+    </div>
 </header>
+
 
 <div class="layout">
 
-    <!-- SIDEBAR -->
+    <!-- =====================================================
+         SIDEBAR
+    ====================================================== -->
+
     <aside class="sidebar">
 
-        <section class="section">
+        <div class="section">
+
             <div class="section-header">
-                <h2>📦 Projects</h2>
-                <button class="secondary" onclick="loadProjects()">↻</button>
+                <div>
+                    <div class="section-title">Projects</div>
+
+                    <div
+                        id="project-count"
+                        class="count"
+                    >
+                        Loading...
+                    </div>
+                </div>
+
+                <button
+                    class="icon-button"
+                    onclick="loadProjects()"
+                    title="Refresh projects"
+                >
+                    ↻
+                </button>
             </div>
 
-            <div id="project-count" class="count">
-                Loading...
-            </div>
-
-            <div id="projects">
-                <div class="loading">Loading projects...</div>
-            </div>
-        </section>
-
-        <section class="section">
-            <div class="section-header">
-                <h2>📁 Generated Files</h2>
-                <button class="secondary" onclick="loadFiles()">↻</button>
-            </div>
-
-            <div id="file-count" class="count">
-                Loading...
-            </div>
-
-            <div id="files" class="legacy">
-                <div class="loading">Loading files...</div>
-            </div>
-        </section>
-
-    </aside>
-
-
-    <!-- MAIN -->
-    <main class="main">
-
-        <!-- PROJECT HOME -->
-        <div id="home-view">
-
-            <div class="status">
-                <strong>🤖 AutoDev Agent</strong><br><br>
-                Select a project to inspect its files, tests, repairs and ZIP package.
-            </div>
-
-            <h2>📦 Generated Projects</h2>
-
-            <div id="overview" style="margin-top:14px;">
-                <div class="empty">No projects yet.</div>
+            <div
+                id="projects"
+                class="project-list"
+            >
+                <div class="empty">
+                    Loading projects...
+                </div>
             </div>
 
         </div>
 
 
-        <!-- PROJECT DETAILS -->
-        <div id="project-view" class="project-view">
+        <div class="section">
 
-            <button class="secondary back" onclick="showHome()">
-                ← Back
+            <div class="section-header">
+
+                <div>
+                    <div class="section-title">
+                        Recent Tasks
+                    </div>
+
+                    <div class="count">
+                        Background executions
+                    </div>
+                </div>
+
+                <button
+                    class="icon-button"
+                    onclick="loadTasks()"
+                    title="Refresh tasks"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+            <div
+                id="recent-tasks"
+                class="recent-list"
+            >
+                <div class="empty">
+                    No tasks yet.
+                </div>
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <main class="main">
+
+        <!-- =================================================
+             HOME
+        ================================================== -->
+
+        <div
+            id="home-view"
+            class="home"
+        >
+
+            <div class="hero">
+                <h1>Build something.</h1>
+
+                <p>
+                    Describe what you want and let AutoDev plan,
+                    generate, test, repair and package it.
+                </p>
+            </div>
+
+
+            <!-- TASK INPUT -->
+
+            <section class="task-panel">
+
+                <label
+                    class="task-label"
+                    for="task-input"
+                >
+                    TASK REQUIREMENT
+                </label>
+
+                <textarea
+                    id="task-input"
+                    placeholder="Example: Build a Python calculator with add, subtract, multiply and divide operations."
+                ></textarea>
+
+                <div class="task-actions">
+
+                    <div class="task-hint">
+                        Runs autonomously in the background.
+                    </div>
+
+                    <button
+                        id="run-button"
+                        class="primary-button"
+                        onclick="startTask()"
+                    >
+                        Run Agent
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ACTIVE TASK -->
+
+            <section
+                id="task-status"
+                class="task-status"
+                style="display:none;"
+            >
+
+                <div class="task-status-header">
+
+                    <div>
+                        <h2
+                            id="task-title"
+                            class="task-status-title"
+                        >
+                            Autonomous Task
+                        </h2>
+
+                        <div
+                            id="task-id"
+                            class="task-id"
+                        ></div>
+                    </div>
+
+                    <div
+                        id="task-badge"
+                        class="status-badge"
+                    >
+                        QUEUED
+                    </div>
+
+                </div>
+
+
+                <div class="progress-area">
+
+                    <div class="progress-info">
+
+                        <span id="task-phase">
+                            Waiting
+                        </span>
+
+                        <strong id="task-progress">
+                            0%
+                        </strong>
+
+                    </div>
+
+                    <div class="progress-track">
+                        <div
+                            id="progress-bar"
+                            class="progress-bar"
+                        ></div>
+                    </div>
+
+                </div>
+
+
+                <div class="metrics">
+
+                    <div class="metric">
+                        <div class="metric-label">
+                            Tests
+                        </div>
+
+                        <div
+                            id="metric-tests"
+                            class="metric-value"
+                        >
+                            —
+                        </div>
+                    </div>
+
+
+                    <div class="metric">
+                        <div class="metric-label">
+                            Application
+                        </div>
+
+                        <div
+                            id="metric-app"
+                            class="metric-value"
+                        >
+                            —
+                        </div>
+                    </div>
+
+
+                    <div class="metric">
+                        <div class="metric-label">
+                            Repairs
+                        </div>
+
+                        <div
+                            id="metric-repairs"
+                            class="metric-value"
+                        >
+                            —
+                        </div>
+                    </div>
+
+
+                    <div class="metric">
+                        <div class="metric-label">
+                            Quality Gate
+                        </div>
+
+                        <div
+                            id="metric-quality"
+                            class="metric-value"
+                        >
+                            —
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- LIVE EXECUTION -->
+
+            <div
+                id="execution-area"
+                class="task-grid"
+                style="display:none;"
+            >
+
+                <section class="panel">
+
+                    <div class="panel-header">
+                        LIVE AGENT LOG
+                    </div>
+
+                    <div
+                        id="live-logs"
+                        class="logs"
+                    >
+                        Waiting for agent...
+                    </div>
+
+                </section>
+
+
+                <section class="panel">
+
+                    <div class="panel-header">
+                        EXECUTION RESULT
+                    </div>
+
+                    <div
+                        id="task-result"
+                        class="result"
+                    >
+                        Waiting for completion...
+                    </div>
+
+                </section>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             PROJECT VIEW
+        ================================================== -->
+
+        <div
+            id="project-view"
+            class="project-view"
+        >
+
+            <button
+                class="back-button"
+                onclick="showHome()"
+            >
+                ← Projects
             </button>
 
-            <div id="project-detail">
-                <div class="loading">Loading project...</div>
+
+            <div
+                id="project-detail"
+            >
+                Loading project...
             </div>
 
         </div>
@@ -490,458 +1349,1224 @@
 
 
 <script>
+
+    let currentTaskId = null;
     let currentProject = null;
+    let pollingTimer = null;
 
 
-    // ------------------------------------------------------------
-    // HELPERS
-    // ------------------------------------------------------------
+    /* ========================================================
+       HELPERS
+    ======================================================== */
 
     function escapeHtml(value) {
+
         return String(value ?? "")
             .replaceAll("&", "&amp;")
             .replaceAll("<", "&lt;")
             .replaceAll(">", "&gt;")
             .replaceAll('"', "&quot;")
             .replaceAll("'", "&#039;");
+
     }
 
 
     function projectName(project) {
+
         return (
             project.display_name ||
             project.project_name ||
             project.name ||
             "Unnamed Project"
         );
+
     }
 
 
-    function testStatus(result) {
-        if (!result) {
-            return {
-                text: "NO TEST RESULT",
-                className: "yellow"
-            };
+    function getProjectWorkspace(project) {
+
+        return (
+            project.workspace_name ||
+            project.name ||
+            ""
+        );
+
+    }
+
+
+    function resultPassed(value) {
+
+        return (
+            value === true ||
+            value?.success === true ||
+            value?.passed === true ||
+            value?.status === "passed"
+        );
+
+    }
+
+
+    function setMetric(id, value) {
+
+        const element =
+            document.getElementById(id);
+
+        element.textContent =
+            value;
+
+        element.classList.remove(
+            "pass",
+            "fail"
+        );
+
+        if (
+            value === "PASS"
+        ) {
+            element.classList.add("pass");
         }
 
-        const passed =
-            result.success === true ||
-            result.passed === true ||
-            result.status === "passed";
+        if (
+            value === "FAIL"
+        ) {
+            element.classList.add("fail");
+        }
 
-        return passed
-            ? {
-                text: "TESTS PASSED",
-                className: "green"
-            }
-            : {
-                text: "TESTS FAILED",
-                className: "red"
-            };
     }
 
 
-    // ------------------------------------------------------------
-    // PROJECTS
-    // ------------------------------------------------------------
+    /* ========================================================
+       START ASYNC TASK
+    ======================================================== */
 
-    async function loadProjects() {
-        const list = document.getElementById("projects");
-        const count = document.getElementById("project-count");
+    async function startTask() {
+
+        const input =
+            document.getElementById("task-input");
+
+        const button =
+            document.getElementById("run-button");
+
+        const task =
+            input.value.trim();
+
+
+        if (!task) {
+
+            input.focus();
+
+            return;
+
+        }
+
+
+        button.disabled = true;
+        button.textContent = "Starting...";
+
 
         try {
-            list.innerHTML =
-                '<div class="loading">Loading...</div>';
 
-            const response = await fetch("/projects");
+            const response =
+                await fetch(
+                    "/run-task-async",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            task: task,
+                            inputs: {}
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to start task."
+                );
+
             }
 
-            const data = await response.json();
+
+            currentTaskId =
+                data.task_id;
+
+
+            document
+                .getElementById("task-status")
+                .style.display = "block";
+
+
+            document
+                .getElementById("execution-area")
+                .style.display = "grid";
+
+
+            document
+                .getElementById("task-title")
+                .textContent = task;
+
+
+            document
+                .getElementById("task-id")
+                .textContent =
+                    "Task ID: " +
+                    currentTaskId;
+
+
+            updateTaskStatus(data);
+
+            startPolling();
+
+            loadTasks();
+
+        }
+        catch (error) {
+
+            alert(
+                "Unable to start task:\n\n" +
+                error.message
+            );
+
+        }
+        finally {
+
+            button.disabled = false;
+            button.textContent = "Run Agent";
+
+        }
+
+    }
+
+
+    /* ========================================================
+       TASK STATUS
+    ======================================================== */
+
+    async function refreshTask() {
+
+        if (!currentTaskId) {
+            return;
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/tasks/" +
+                    encodeURIComponent(
+                        currentTaskId
+                    )
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to load task."
+                );
+
+            }
+
+
+            updateTaskStatus(data);
+
+        }
+        catch (error) {
+
+            console.error(
+                "Task status error:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function updateTaskStatus(data) {
+
+        const status =
+            String(
+                data.status ||
+                "queued"
+            ).toLowerCase();
+
+
+        const progress =
+            Math.max(
+                0,
+                Math.min(
+                    100,
+                    Number(
+                        data.progress || 0
+                    )
+                )
+            );
+
+
+        document
+            .getElementById("task-title")
+            .textContent =
+                data.task ||
+                "Autonomous Task";
+
+
+        document
+            .getElementById("task-id")
+            .textContent =
+                "Task ID: " +
+                data.task_id;
+
+
+        document
+            .getElementById("task-phase")
+            .textContent =
+                formatPhase(
+                    data.phase
+                );
+
+
+        document
+            .getElementById("task-progress")
+            .textContent =
+                progress + "%";
+
+
+        document
+            .getElementById("progress-bar")
+            .style.width =
+                progress + "%";
+
+
+        const badge =
+            document.getElementById(
+                "task-badge"
+            );
+
+
+        badge.textContent =
+            status.toUpperCase();
+
+
+        badge.className =
+            "status-badge " +
+            status;
+
+
+        updateMetrics(data);
+
+        renderLogs(
+            data.logs || []
+        );
+
+        renderResult(
+            data.result
+        );
+
+
+        if (
+            status === "completed" ||
+            status === "failed"
+        ) {
+
+            stopPolling();
+
+            loadProjects();
+            loadTasks();
+
+        }
+
+    }
+
+
+    function formatPhase(phase) {
+
+        if (!phase) {
+            return "Waiting";
+        }
+
+
+        return String(phase)
+            .replaceAll("_", " ")
+            .replace(
+                /\b\w/g,
+                char =>
+                    char.toUpperCase()
+            );
+
+    }
+
+
+    /* ========================================================
+       METRICS
+    ======================================================== */
+
+    function updateMetrics(data) {
+
+        const result =
+            data.result || {};
+
+
+        const tests =
+            result.test_result || {};
+
+
+        const application =
+            result.run_result || {};
+
+
+        const gate =
+            result.quality_gate || {};
+
+
+        setMetric(
+            "metric-tests",
+            result.tests_passed === true
+                ? "PASS"
+                : result.tests_passed === false
+                    ? "FAIL"
+                    : tests.passed !== undefined
+                        ? (
+                            tests.passed
+                                ? "PASS"
+                                : "FAIL"
+                        )
+                        : "—"
+        );
+
+
+        setMetric(
+            "metric-app",
+            result.application_passed === true
+                ? "PASS"
+                : result.application_passed === false
+                    ? "FAIL"
+                    : application.success !== undefined
+                        ? (
+                            application.success
+                                ? "PASS"
+                                : "FAIL"
+                        )
+                        : "—"
+        );
+
+
+        document
+            .getElementById(
+                "metric-repairs"
+            )
+            .textContent =
+                result.repair_attempts ??
+                "—";
+
+
+        setMetric(
+            "metric-quality",
+            gate.passed === true
+                ? "PASS"
+                : gate.passed === false
+                    ? "FAIL"
+                    : "—"
+        );
+
+    }
+
+
+    /* ========================================================
+       LOGS
+    ======================================================== */
+
+    function renderLogs(logs) {
+
+        const container =
+            document.getElementById(
+                "live-logs"
+            );
+
+
+        if (
+            !logs ||
+            !logs.length
+        ) {
+
+            container.textContent =
+                "Waiting for agent...";
+
+            return;
+
+        }
+
+
+        container.innerHTML =
+            logs
+                .map(
+                    line =>
+                        `<div class="log-line">${escapeHtml(line)}</div>`
+                )
+                .join("");
+
+
+        container.scrollTop =
+            container.scrollHeight;
+
+    }
+
+
+    /* ========================================================
+       RESULT
+    ======================================================== */
+
+    function renderResult(result) {
+
+        const container =
+            document.getElementById(
+                "task-result"
+            );
+
+
+        if (!result) {
+
+            container.textContent =
+                "Waiting for completion...";
+
+            return;
+
+        }
+
+
+        const summary = {
+
+            success:
+                result.success,
+
+            project:
+                result.workspace_name ||
+                result.project_name,
+
+            files:
+                result.files,
+
+            tests_passed:
+                result.tests_passed,
+
+            application_passed:
+                result.application_passed,
+
+            repair_attempts:
+                result.repair_attempts,
+
+            quality_gate:
+                result.quality_gate?.passed,
+
+            zip:
+                result.zip_file
+
+        };
+
+
+        container.textContent =
+            JSON.stringify(
+                summary,
+                null,
+                2
+            );
+
+    }
+
+
+    /* ========================================================
+       POLLING
+    ======================================================== */
+
+    function startPolling() {
+
+        stopPolling();
+
+        pollingTimer =
+            setInterval(
+                refreshTask,
+                900
+            );
+
+    }
+
+
+    function stopPolling() {
+
+        if (pollingTimer) {
+
+            clearInterval(
+                pollingTimer
+            );
+
+            pollingTimer = null;
+
+        }
+
+    }
+
+
+    /* ========================================================
+       PROJECTS
+    ======================================================== */
+
+    async function loadProjects() {
+
+        const container =
+            document.getElementById(
+                "projects"
+            );
+
+        const count =
+            document.getElementById(
+                "project-count"
+            );
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/projects"
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "HTTP " +
+                    response.status
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
 
             const projects =
                 Array.isArray(data)
                     ? data
                     : data.projects || [];
 
-            count.textContent =
-                `${projects.length} project(s)`;
 
-            list.innerHTML = "";
+            count.textContent =
+                projects.length +
+                (
+                    projects.length === 1
+                        ? " project"
+                        : " projects"
+                );
+
+
+            container.innerHTML = "";
+
 
             if (!projects.length) {
-                list.innerHTML =
+
+                container.innerHTML =
                     '<div class="empty">No projects yet.</div>';
 
-                renderOverview([]);
                 return;
+
             }
 
-            renderOverview(projects);
 
-            projects.forEach(project => {
-                const name = projectName(project);
+            projects.forEach(
+                project => {
 
-                const workspace =
-                    project.workspace_name ||
-                    project.name ||
-                    "";
+                    const workspace =
+                        getProjectWorkspace(
+                            project
+                        );
 
-                const files =
-                    project.file_count ??
-                    (
-                        Array.isArray(project.files)
-                            ? project.files.length
-                            : 0
+
+                    const files =
+                        project.file_count ??
+                        (
+                            Array.isArray(
+                                project.files
+                            )
+                                ? project.files.length
+                                : 0
+                        );
+
+
+                    const item =
+                        document.createElement(
+                            "button"
+                        );
+
+
+                    item.className =
+                        "project-item";
+
+
+                    item.onclick =
+                        () =>
+                            openProject(
+                                workspace
+                            );
+
+
+                    item.innerHTML = `
+
+                        <div class="project-name">
+                            ${escapeHtml(
+                                projectName(
+                                    project
+                                )
+                            )}
+                        </div>
+
+                        <div class="project-meta">
+                            ${files} files
+                        </div>
+
+                    `;
+
+
+                    container.appendChild(
+                        item
                     );
 
-                const card =
-                    document.createElement("div");
+                }
+            );
 
-                card.className = "card";
-
-                card.innerHTML = `
-                    <div class="card-title">
-                        📦 ${escapeHtml(name)}
-                    </div>
-
-                    <div class="card-meta">
-                        ${files} file(s)
-                    </div>
-
-                    <div class="actions">
-                        <button onclick="openProject('${encodeURIComponent(workspace)}')">
-                            Open
-                        </button>
-
-                        <button
-                            class="zip"
-                            onclick="downloadProject('${encodeURIComponent(workspace)}')"
-                        >
-                            ZIP
-                        </button>
-
-                        <button
-                            class="danger"
-                            onclick="deleteProject('${encodeURIComponent(workspace)}')"
-                        >
-                            Delete
-                        </button>
-                    </div>
-                `;
-
-                list.appendChild(card);
-            });
-
-        } catch (error) {
-            list.innerHTML =
-                '<div class="empty">❌ Failed to load projects.</div>';
-
-            count.textContent = "Unable to load.";
-
-            console.error(error);
         }
+        catch (error) {
+
+            container.innerHTML =
+                '<div class="empty">Unable to load projects.</div>';
+
+            count.textContent =
+                "Unavailable";
+
+            console.error(
+                error
+            );
+
+        }
+
     }
 
 
-    function renderOverview(projects) {
+    /* ========================================================
+       RECENT TASKS
+    ======================================================== */
+
+    async function loadTasks() {
+
         const container =
-            document.getElementById("overview");
+            document.getElementById(
+                "recent-tasks"
+            );
 
-        if (!projects.length) {
+
+        try {
+
+            const response =
+                await fetch(
+                    "/tasks?limit=12"
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to load tasks."
+                );
+
+            }
+
+
+            const tasks =
+                data.tasks || [];
+
+
+            container.innerHTML = "";
+
+
+            if (!tasks.length) {
+
+                container.innerHTML =
+                    '<div class="empty">No tasks yet.</div>';
+
+                return;
+
+            }
+
+
+            tasks.forEach(
+                task => {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    item.className =
+                        "recent-item";
+
+
+                    item.onclick =
+                        async () => {
+
+                            currentTaskId =
+                                task.task_id;
+
+
+                            document
+                                .getElementById(
+                                    "task-status"
+                                )
+                                .style.display =
+                                    "block";
+
+
+                            document
+                                .getElementById(
+                                    "execution-area"
+                                )
+                                .style.display =
+                                    "grid";
+
+
+                            await refreshTask();
+
+                            document
+                                .getElementById(
+                                    "home-view"
+                                )
+                                .scrollIntoView({
+                                    behavior:
+                                        "smooth"
+                                });
+
+                        };
+
+
+                    item.innerHTML = `
+
+                        <div>
+
+                            <div class="recent-task">
+                                ${escapeHtml(
+                                    task.task ||
+                                    "Untitled task"
+                                )}
+                            </div>
+
+                            <div class="recent-meta">
+                                ${formatPhase(
+                                    task.phase
+                                )}
+                                ·
+                                ${Number(
+                                    task.progress || 0
+                                )}%
+                            </div>
+
+                        </div>
+
+                        <div class="recent-status">
+                            ${escapeHtml(
+                                task.status ||
+                                ""
+                            )}
+                        </div>
+
+                    `;
+
+
+                    container.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+        }
+        catch (error) {
+
             container.innerHTML =
-                '<div class="empty">No generated projects yet.</div>';
+                '<div class="empty">Unable to load tasks.</div>';
 
+            console.error(
+                error
+            );
+
+        }
+
+    }
+
+
+    /* ========================================================
+       OPEN PROJECT
+    ======================================================== */
+
+    async function openProject(
+        workspace
+    ) {
+
+        if (!workspace) {
             return;
         }
 
-        const fileCount =
-            projects.reduce(
-                (total, project) =>
-                    total +
-                    (
-                        project.file_count ||
-                        (
-                            Array.isArray(project.files)
-                                ? project.files.length
-                                : 0
-                        )
-                    ),
-                0
+
+        currentProject =
+            workspace;
+
+
+        document
+            .getElementById(
+                "home-view"
+            )
+            .style.display =
+                "none";
+
+
+        document
+            .getElementById(
+                "project-view"
+            )
+            .classList.add(
+                "active"
             );
 
-        container.innerHTML = `
-            <div class="overview">
-
-                <div class="stat">
-                    <div class="stat-label">Projects</div>
-                    <div class="stat-value">${projects.length}</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-label">Files</div>
-                    <div class="stat-value">${fileCount}</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-label">Packages</div>
-                    <div class="stat-value">${projects.length}</div>
-                </div>
-
-                <div class="stat">
-                    <div class="stat-label">Agent</div>
-                    <div class="stat-value">🤖</div>
-                </div>
-
-            </div>
-        `;
-    }
-
-
-    // ------------------------------------------------------------
-    // OPEN PROJECT
-    // ------------------------------------------------------------
-
-    async function openProject(encodedWorkspace) {
-        const workspace =
-            decodeURIComponent(encodedWorkspace);
-
-        currentProject = workspace;
-
-        document.getElementById("home-view").style.display =
-            "none";
-
-        document.getElementById("project-view")
-            .classList.add("active");
 
         const container =
-            document.getElementById("project-detail");
+            document.getElementById(
+                "project-detail"
+            );
+
 
         container.innerHTML =
-            '<div class="loading">Loading project...</div>';
+            '<div class="empty">Loading project...</div>';
+
 
         try {
+
             const response =
                 await fetch(
-                    `/projects/${encodeURIComponent(workspace)}`
+                    "/projects/" +
+                    encodeURIComponent(
+                        workspace
+                    )
                 );
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
 
             const project =
                 await response.json();
 
-            renderProject(project);
 
-        } catch (error) {
+            if (!response.ok) {
+
+                throw new Error(
+                    project.detail ||
+                    "Unable to load project."
+                );
+
+            }
+
+
+            renderProject(
+                project
+            );
+
+        }
+        catch (error) {
+
             container.innerHTML = `
-                <div class="status error">
-                    ❌ ${escapeHtml(error.message)}
+
+                <div class="task-panel">
+
+                    Unable to load project.
+
+                    <br><br>
+
+                    ${escapeHtml(
+                        error.message
+                    )}
+
                 </div>
+
             `;
 
-            console.error(error);
         }
+
     }
 
 
-    // ------------------------------------------------------------
-    // PROJECT DETAILS
-    // ------------------------------------------------------------
+    /* ========================================================
+       RENDER PROJECT
+    ======================================================== */
 
-    function renderProject(project) {
+    function renderProject(
+        project
+    ) {
+
         const container =
-            document.getElementById("project-detail");
+            document.getElementById(
+                "project-detail"
+            );
 
-        const name = projectName(project);
+
+        const name =
+            projectName(
+                project
+            );
+
+
+        const workspace =
+            getProjectWorkspace(
+                project
+            );
+
 
         const files =
-            Array.isArray(project.files)
+            Array.isArray(
+                project.files
+            )
                 ? project.files
                 : [];
+
 
         const tests =
             project.test_result ||
             project.result?.test_result ||
             null;
 
+
         const repairs =
             project.repair_attempts ??
             project.result?.repair_attempts ??
             0;
 
-        const history =
+
+        const repairHistory =
             project.repair_history ||
             project.result?.repair_history ||
             [];
 
-        const status =
-            testStatus(tests);
 
-        const workspace =
-            project.workspace_name ||
-            currentProject;
+        const description =
+            project.summary ||
+            project.description ||
+            "Autonomously generated project.";
+
 
         const fileItems =
             files.length
-                ? files.map(file => {
 
-                    const path =
-                        typeof file === "string"
-                            ? file
-                            : file.path;
+                ? files
+                    .map(
+                        file => {
 
-                    return `
-                        <div
-                            class="file-item"
-                            data-file="${escapeHtml(path)}"
-                            onclick="viewFile('${encodeURIComponent(path)}')"
-                        >
-                            📄 ${escapeHtml(path)}
-                        </div>
-                    `;
+                            const path =
+                                typeof file === "string"
+                                    ? file
+                                    : file.path;
 
-                }).join("")
-                : '<div class="empty">No files.</div>';
+
+                            return `
+
+                                <div
+                                    class="file-item"
+                                    data-file="${escapeHtml(path)}"
+                                    onclick="viewProjectFile('${encodeURIComponent(path)}')"
+                                >
+                                    ${escapeHtml(path)}
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("")
+
+                : `
+                    <div class="empty">
+                        No project files.
+                    </div>
+                `;
 
 
         const repairItems =
-            history.length
-                ? history.map((item, index) => {
+            repairHistory.length
 
-                    const message =
-                        item.error ||
-                        item.failure ||
-                        item.message ||
-                        JSON.stringify(item, null, 2);
+                ? repairHistory
+                    .map(
+                        (
+                            repair,
+                            index
+                        ) => {
 
-                    return `
-                        <div class="repair">
-                            <strong>
-                                🔧 Repair Attempt ${index + 1}
-                            </strong>
-
-                            <pre>${escapeHtml(message)}</pre>
-                        </div>
-                    `;
-
-                }).join("")
-                : '<div class="empty">No repairs required.</div>';
+                            const message =
+                                repair.diagnosis ||
+                                repair.error ||
+                                repair.failure ||
+                                repair.message ||
+                                JSON.stringify(
+                                    repair,
+                                    null,
+                                    2
+                                );
 
 
-        const testOutput =
-            tests
-                ? (
-                    tests.output ||
-                    tests.stdout ||
-                    tests.message ||
-                    "Test execution completed."
-                )
-                : "";
+                            return `
+
+                                <div class="repair-item">
+
+                                    <div class="repair-label">
+                                        Repair ${index + 1}
+                                    </div>
+
+                                    <div class="repair-message">
+                                        ${escapeHtml(
+                                            message
+                                        )}
+                                    </div>
+
+                                </div>
+
+                            `;
+
+                        }
+                    )
+                    .join("")
+
+                : `
+                    <div class="empty">
+                        No repairs required.
+                    </div>
+                `;
+
+
+        const testsPassed =
+            resultPassed(
+                tests
+            );
 
 
         container.innerHTML = `
+
             <div class="project-header">
 
-                <h2>📦 ${escapeHtml(name)}</h2>
+                <div class="project-header-top">
 
-                <p>
-                    Workspace:
-                    ${escapeHtml(workspace)}
-                </p>
+                    <div>
 
-                <p>
-                    ${escapeHtml(
-                        project.summary ||
-                        project.description ||
-                        "Autonomously generated project."
-                    )}
-                </p>
+                        <h1 class="project-title">
+                            ${escapeHtml(name)}
+                        </h1>
 
-                <div class="badges">
+                        <p class="project-description">
+                            ${escapeHtml(
+                                description
+                            )}
+                        </p>
 
-                    <span class="badge ${status.className}">
-                        ${status.text}
-                    </span>
-
-                    <span class="badge blue">
-                        ${files.length} FILES
-                    </span>
-
-                    <span class="badge ${
-                        repairs
-                            ? "yellow"
-                            : "green"
-                    }">
-                        ${repairs} REPAIRS
-                    </span>
-
-                </div>
-
-                <div class="project-actions">
-
-                    <button
-                        class="zip"
-                        onclick="downloadProject('${encodeURIComponent(workspace)}')"
-                    >
-                        📦 Download ZIP
-                    </button>
-
-                    <button
-                        class="danger"
-                        onclick="deleteProject('${encodeURIComponent(workspace)}')"
-                    >
-                        🗑 Delete Project
-                    </button>
-
-                </div>
-
-                <div class="overview">
-
-                    <div class="stat">
-                        <div class="stat-label">Files</div>
-                        <div class="stat-value">${files.length}</div>
                     </div>
 
-                    <div class="stat">
-                        <div class="stat-label">Tests</div>
-                        <div class="stat-value">
+
+                    <div class="project-buttons">
+
+                        <button
+                            class="small-button download"
+                            onclick="downloadProject('${encodeURIComponent(workspace)}')"
+                        >
+                            ZIP
+                        </button>
+
+                        <button
+                            class="small-button delete"
+                            onclick="deleteProject('${encodeURIComponent(workspace)}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="project-stats">
+
+                    <div class="project-stat">
+
+                        <div class="project-stat-label">
+                            Files
+                        </div>
+
+                        <div class="project-stat-value">
+                            ${files.length}
+                        </div>
+
+                    </div>
+
+
+                    <div class="project-stat">
+
+                        <div class="project-stat-label">
+                            Tests
+                        </div>
+
+                        <div
+                            class="project-stat-value ${
+                                testsPassed
+                                    ? "pass"
+                                    : ""
+                            }"
+                        >
                             ${
                                 tests
                                     ? (
-                                        tests.success === true ||
-                                        tests.passed === true
+                                        testsPassed
                                             ? "PASS"
                                             : "FAIL"
                                     )
                                     : "N/A"
                             }
                         </div>
+
                     </div>
 
-                    <div class="stat">
-                        <div class="stat-label">Repairs</div>
-                        <div class="stat-value">${repairs}</div>
-                    </div>
 
-                    <div class="stat">
-                        <div class="stat-label">Status</div>
-                        <div class="stat-value">
-                            ${
-                                tests &&
-                                (
-                                    tests.success === true ||
-                                    tests.passed === true
-                                )
-                                    ? "✅"
-                                    : "🤖"
-                            }
+                    <div class="project-stat">
+
+                        <div class="project-stat-label">
+                            Repairs
                         </div>
+
+                        <div class="project-stat-value">
+                            ${repairs}
+                        </div>
+
                     </div>
 
                 </div>
@@ -949,419 +2574,312 @@
             </div>
 
 
-            ${
-                tests
-                    ? `
-                        <div class="card">
-                            <div class="card-title">
-                                🧪 Test Result
-                            </div>
+            <div class="file-viewer">
 
-                            <div class="card-meta">
-                                ${escapeHtml(testOutput)}
-                            </div>
-                        </div>
-                    `
-                    : ""
-            }
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    📂 Project Files
+                <div class="file-list">
+                    ${fileItems}
                 </div>
 
-                <div class="file-viewer">
 
-                    <div class="file-list">
-                        ${fileItems}
+                <div class="code-view">
+
+                    <div
+                        id="code-title"
+                        class="code-title"
+                    >
+                        Select a file
                     </div>
 
-                    <div class="code">
-
-                        <div
-                            id="code-title"
-                            class="code-title"
-                        >
-                            Select a file
-                        </div>
-
-                        <pre id="code">
+                    <pre id="code">
 Select a project file to preview its contents.
-                        </pre>
-
-                    </div>
+                    </pre>
 
                 </div>
 
             </div>
 
 
-            <div class="card">
+            <div class="repair-section">
 
-                <div class="card-title">
-                    🔧 Repair History
+                <div class="repair-title">
+                    REPAIR HISTORY
                 </div>
 
                 ${repairItems}
 
             </div>
+
         `;
 
 
         if (files.length) {
+
             const first =
                 typeof files[0] === "string"
                     ? files[0]
                     : files[0].path;
 
-            viewFile(
-                encodeURIComponent(first)
+
+            viewProjectFile(
+                encodeURIComponent(
+                    first
+                )
             );
+
         }
+
     }
 
 
-    // ------------------------------------------------------------
-    // VIEW PROJECT FILE
-    // ------------------------------------------------------------
+    /* ========================================================
+       VIEW PROJECT FILE
+    ======================================================== */
 
-    async function viewFile(encodedPath) {
+    async function viewProjectFile(
+        encodedPath
+    ) {
+
         const path =
-            decodeURIComponent(encodedPath);
+            decodeURIComponent(
+                encodedPath
+            );
+
 
         if (!currentProject) {
             return;
         }
 
+
         const code =
-            document.getElementById("code");
+            document.getElementById(
+                "code"
+            );
+
 
         const title =
-            document.getElementById("code-title");
+            document.getElementById(
+                "code-title"
+            );
+
 
         title.textContent =
-            `Loading: ${path}`;
+            path;
+
 
         code.textContent =
             "Loading...";
 
+
         try {
+
             const url =
-                `/projects/${encodeURIComponent(currentProject)}/file/` +
+                "/projects/" +
+                encodeURIComponent(
+                    currentProject
+                ) +
+                "/file/" +
                 path
                     .split("/")
-                    .map(encodeURIComponent)
+                    .map(
+                        encodeURIComponent
+                    )
                     .join("/");
 
+
             const response =
-                await fetch(url);
+                await fetch(
+                    url
+                );
+
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+
+                throw new Error(
+                    "HTTP " +
+                    response.status
+                );
+
             }
+
 
             code.textContent =
                 await response.text();
 
-            title.textContent =
-                `📄 ${path}`;
 
             document
-                .querySelectorAll(".file-item")
-                .forEach(item => {
-                    item.classList.toggle(
-                        "active",
-                        item.dataset.file === path
-                    );
-                });
+                .querySelectorAll(
+                    ".file-item"
+                )
+                .forEach(
+                    item => {
 
-        } catch (error) {
-            title.textContent = "❌ Error";
+                        item.classList.toggle(
+                            "active",
+                            item.dataset.file ===
+                                path
+                        );
+
+                    }
+                );
+
+        }
+        catch (error) {
+
+            title.textContent =
+                "Unable to load file";
 
             code.textContent =
-                `Unable to load file.\n\n${error.message}`;
+                error.message;
+
         }
+
     }
 
 
-    // ------------------------------------------------------------
-    // DOWNLOAD
-    // ------------------------------------------------------------
+    /* ========================================================
+       DOWNLOAD
+    ======================================================== */
 
-    function downloadProject(encodedWorkspace) {
+    function downloadProject(
+        encodedWorkspace
+    ) {
+
         const workspace =
-            decodeURIComponent(encodedWorkspace);
+            decodeURIComponent(
+                encodedWorkspace
+            );
+
 
         window.location.href =
-            `/download-project/${encodeURIComponent(workspace)}`;
+            "/download-project/" +
+            encodeURIComponent(
+                workspace
+            );
+
     }
 
 
-    // ------------------------------------------------------------
-    // DELETE PROJECT
-    // ------------------------------------------------------------
+    /* ========================================================
+       DELETE PROJECT
+    ======================================================== */
 
-    async function deleteProject(encodedWorkspace) {
+    async function deleteProject(
+        encodedWorkspace
+    ) {
+
         const workspace =
-            decodeURIComponent(encodedWorkspace);
+            decodeURIComponent(
+                encodedWorkspace
+            );
+
 
         if (
             !confirm(
                 `Delete "${workspace}"?\n\nThe project and ZIP package will be removed.`
             )
         ) {
+
             return;
+
         }
 
+
         try {
+
             const response =
                 await fetch(
-                    `/projects/${encodeURIComponent(workspace)}`,
+                    "/projects/" +
+                    encodeURIComponent(
+                        workspace
+                    ),
                     {
-                        method: "DELETE"
+                        method:
+                            "DELETE"
                     }
                 );
 
-            let data = {};
-
-            try {
-                data = await response.json();
-            } catch (_) {}
-
-            if (!response.ok) {
-                throw new Error(
-                    data.detail ||
-                    "Failed to delete project."
-                );
-            }
-
-            if (currentProject === workspace) {
-                showHome();
-            }
-
-            await loadProjects();
-
-            alert("✅ Project deleted.");
-
-        } catch (error) {
-            alert(
-                `❌ Delete failed: ${error.message}`
-            );
-        }
-    }
-
-
-    // ------------------------------------------------------------
-    // HOME
-    // ------------------------------------------------------------
-
-    function showHome() {
-        currentProject = null;
-
-        document.getElementById("home-view")
-            .style.display = "block";
-
-        document.getElementById("project-view")
-            .classList.remove("active");
-    }
-
-
-    // ------------------------------------------------------------
-    // LEGACY GENERATED FILES
-    // ------------------------------------------------------------
-
-    async function loadFiles() {
-        const container =
-            document.getElementById("files");
-
-        const count =
-            document.getElementById("file-count");
-
-        try {
-            container.innerHTML =
-                '<div class="loading">Loading...</div>';
-
-            const response =
-                await fetch("/generated-files");
-
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
 
             const data =
-                await response.json();
+                await response.json()
+                    .catch(
+                        () => ({})
+                    );
 
-            const files =
-                data.files || [];
-
-            count.textContent =
-                `${files.length} file(s)`;
-
-            container.innerHTML = "";
-
-            if (!files.length) {
-                container.innerHTML =
-                    '<div class="empty">No generated files.</div>';
-
-                return;
-            }
-
-            files.forEach(file => {
-                const card =
-                    document.createElement("div");
-
-                card.className = "card";
-
-                card.innerHTML = `
-                    <div class="card-title">
-                        🐍 ${escapeHtml(file.name)}
-                    </div>
-
-                    <div class="actions">
-
-                        <button
-                            onclick="viewLegacyFile('${encodeURIComponent(file.name)}')"
-                        >
-                            View
-                        </button>
-
-                        <button
-                            onclick="window.location.href='${file.download_url}'"
-                        >
-                            Download
-                        </button>
-
-                        <button
-                            class="danger"
-                            onclick="deleteLegacyFile('${encodeURIComponent(file.name)}')"
-                        >
-                            Delete
-                        </button>
-
-                    </div>
-                `;
-
-                container.appendChild(card);
-            });
-
-        } catch (error) {
-            container.innerHTML =
-                '<div class="empty">❌ Failed to load.</div>';
-
-            count.textContent =
-                "Unable to load.";
-
-            console.error(error);
-        }
-    }
-
-
-    async function viewLegacyFile(encodedName) {
-        const filename =
-            decodeURIComponent(encodedName);
-
-        try {
-            const response =
-                await fetch(
-                    `/view/${encodeURIComponent(filename)}`
-                );
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+
+                throw new Error(
+                    data.detail ||
+                    "Unable to delete project."
+                );
+
             }
 
-            const code =
-                await response.text();
 
             showHome();
 
-            document.getElementById("overview")
-                .innerHTML = `
-                    <div class="card">
+            await loadProjects();
 
-                        <div class="card-title">
-                            📄 ${escapeHtml(filename)}
-                        </div>
-
-                        <div class="code">
-                            <div class="code-title">
-                                Generated File
-                            </div>
-
-                            <pre>${escapeHtml(code)}</pre>
-                        </div>
-
-                    </div>
-                `;
-
-        } catch (error) {
-            alert(
-                `❌ Unable to load file: ${error.message}`
-            );
         }
+        catch (error) {
+
+            alert(
+                "Delete failed:\n\n" +
+                error.message
+            );
+
+        }
+
     }
 
 
-    async function deleteLegacyFile(encodedName) {
-        const filename =
-            decodeURIComponent(encodedName);
+    /* ========================================================
+       HOME
+    ======================================================== */
 
-        if (
-            !confirm(
-                `Delete "${filename}"?`
+    function showHome() {
+
+        currentProject = null;
+
+
+        document
+            .getElementById(
+                "project-view"
             )
-        ) {
-            return;
-        }
-
-        try {
-            const response =
-                await fetch(
-                    `/generated-files/${encodeURIComponent(filename)}`,
-                    {
-                        method: "DELETE"
-                    }
-                );
-
-            let data = {};
-
-            try {
-                data = await response.json();
-            } catch (_) {}
-
-            if (!response.ok) {
-                throw new Error(
-                    data.detail ||
-                    "Failed to delete file."
-                );
-            }
-
-            await loadFiles();
-
-            alert("✅ File deleted.");
-
-        } catch (error) {
-            alert(
-                `❌ Delete failed: ${error.message}`
+            .classList.remove(
+                "active"
             );
-        }
+
+
+        document
+            .getElementById(
+                "home-view"
+            )
+            .style.display =
+                "block";
+
+
+        loadProjects();
+
     }
 
 
-    // ------------------------------------------------------------
-    // INITIAL LOAD
-    // ------------------------------------------------------------
+    /* ========================================================
+       INITIALIZATION
+    ======================================================== */
 
     async function init() {
+
         await Promise.all([
             loadProjects(),
-            loadFiles()
+            loadTasks()
         ]);
+
     }
 
+
     init();
+
 </script>
 
 </body>
