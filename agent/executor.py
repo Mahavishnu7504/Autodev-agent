@@ -2255,11 +2255,20 @@ def execute_project(
         success = tests_success
 
     # ========================================================
+    # FINAL CLEANUP BEFORE QUALITY GATE
+    # ========================================================
+
+    # Runtime/test execution can create __pycache__, .pytest_cache and
+    # similar artifacts. Remove them before the final quality decision
+    # so the gate evaluates the deliverable that will actually be zipped.
+    _cleanup_generated_artifacts(workspace)
+
+    # ========================================================
     # AUTONOMOUS QUALITY GATE
     # ========================================================
 
-    # Evaluate the raw workspace before cleanup so the gate can detect
-    # caches, package collisions, syntax/import defects and other issues.
+    # The gate now evaluates the cleaned deliverable, including syntax,
+    # structure, imports, tests, requirements and artifact cleanliness.
     try:
         quality_gate = run_quality_gate(
             workspace=workspace,
@@ -2290,13 +2299,7 @@ def execute_project(
     success = bool(success and quality_gate.get("passed", False))
 
     # ========================================================
-    # FINAL CLEANUP
-    # ========================================================
-
-    _cleanup_generated_artifacts(workspace)
-
-    # ========================================================
-    # ZIP
+    # ZIP FINAL DELIVERABLE
     # ========================================================
 
     zip_path = create_project_zip(workspace)

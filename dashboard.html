@@ -1441,7 +1441,8 @@
 
                             <button
                                 class="small-button"
-                                onclick="refreshTask()"
+                                type="button"
+                                onclick="clearActiveTask()"
                             >
                                 Refresh
                             </button>
@@ -2498,6 +2499,102 @@
                     2
                 );
 
+        }
+
+
+        /* =========================================================
+           CLEAR ACTIVE TASK
+        ========================================================= */
+
+        function clearActiveTask() {
+
+            currentTaskId = null;
+            stopPolling();
+
+            const taskStatus =
+                document.getElementById("task-status");
+
+            const executionArea =
+                document.getElementById("execution-area");
+
+            if (taskStatus) {
+                taskStatus.style.display = "none";
+            }
+
+            if (executionArea) {
+                executionArea.style.display = "none";
+            }
+
+            const title =
+                document.getElementById("task-title");
+
+            const taskId =
+                document.getElementById("task-id");
+
+            const phase =
+                document.getElementById("task-phase");
+
+            const progress =
+                document.getElementById("task-progress");
+
+            const progressBar =
+                document.getElementById("progress-bar");
+
+            const badge =
+                document.getElementById("task-badge");
+
+            const logs =
+                document.getElementById("live-logs");
+
+            const result =
+                document.getElementById("task-result");
+
+            if (title) {
+                title.textContent = "Autonomous Task";
+            }
+
+            if (taskId) {
+                taskId.textContent = "";
+            }
+
+            if (phase) {
+                phase.textContent = "Waiting";
+            }
+
+            if (progress) {
+                progress.textContent = "0%";
+            }
+
+            if (progressBar) {
+                progressBar.style.width = "0%";
+            }
+
+            if (badge) {
+                badge.textContent = "QUEUED";
+                badge.className = "status-badge";
+            }
+
+            setMetric("metric-tests", "—");
+            setMetric("metric-app", "—");
+            setMetric("metric-quality", "—");
+
+            const repairs =
+                document.getElementById("metric-repairs");
+
+            if (repairs) {
+                repairs.textContent = "—";
+                repairs.classList.remove("pass", "fail");
+            }
+
+            if (logs) {
+                logs.textContent = "Waiting for agent...";
+            }
+
+            if (result) {
+                result.textContent = "Waiting for completion...";
+            }
+
+            showError("");
         }
 
 
