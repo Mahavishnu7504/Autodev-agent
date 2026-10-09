@@ -72,15 +72,19 @@ def _validate_patch(payload: Dict[str, Any]) -> Dict[str, Any]:
         if not path or content is None or not str(content).strip():
             continue
 
-        raw_path = path.replace("\\", "/")
+        raw_path = path.replace("\\\\", "/").strip()
         candidate = Path(raw_path)
-        normalized = raw_path
         if (
-            raw_path.startswith("/")
+            not raw_path
+            or "\\x00" in raw_path
+            or raw_path.startswith("/")
             or candidate.is_absolute()
             or ".." in candidate.parts
             or re.match(r"^[A-Za-z]:", raw_path)
         ):
+            raise ValueError(f"Unsafe repair path: {path}")
+        normalized = "/".join(part for part in raw_path.split("/") if part not in ("", "."))
+        if not normalized:
             raise ValueError(f"Unsafe repair path: {path}")
 
         if normalized == "tests" or normalized.startswith("tests/"):
@@ -204,6 +208,8 @@ Rules:
     Do NOT merely print usage and exit 0 if that hides that no meaningful
     application behavior ran. Preserve requested features and CLI contract.
 18. Never replace an existing Python package directory with a same-named .py module.
+19. Do not modify tests, quality-gate logic, CI checks, or security controls to make validation pass.
+20. Never emit absolute paths, parent-directory traversal, drive-letter paths, or empty paths.
 
 STRUCTURE SAFETY:
 {_structure_rules(project)}

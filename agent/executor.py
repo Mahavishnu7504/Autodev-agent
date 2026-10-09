@@ -1,4 +1,5 @@
 import re
+import json
 import shutil
 import subprocess
 import sys
@@ -6,6 +7,7 @@ import uuid
 import zipfile
 
 from pathlib import Path
+from datetime import datetime, timezone
 
 from typing import Dict, Optional, Any
 from agent.quality_gate import run_quality_gate
@@ -166,46 +168,19 @@ def _safe_name(value: str) -> str:
     return value[:80] or "AutoDev_Project"
 
 def _safe_relative_path(path: str) -> Path:
-
-    normalized = (
-
-        str(path)
-
-        .replace("\\", "/")
-
-        .strip()
-
-        .lstrip("/")
-
-    )
-
-    if not normalized:
-
-        raise ValueError(
-
-            "Project path cannot be empty."
-
-        )
-
-    candidate = Path(normalized)
-
-    if candidate.is_absolute():
-
-        raise ValueError(
-
-            f"Absolute project path is not allowed: {path}"
-
-        )
-
-    if ".." in candidate.parts:
-
-        raise ValueError(
-
-            f"Unsafe project path: {path}"
-
-        )
-
-    return candidate
+    """Normalize a project-relative path and reject traversal/absolute paths."""
+    raw = str(path or "").replace("\\\\", "/").strip()
+    if not raw or "\\x00" in raw:
+        raise ValueError("Project path cannot be empty or contain NUL bytes.")
+    if raw.startswith("/") or re.match(r"^[A-Za-z]:", raw):
+        raise ValueError(f"Absolute project path is not allowed: {path}")
+    candidate = Path(raw)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        raise ValueError(f"Unsafe project path: {path}")
+    parts = [part for part in candidate.parts if part not in ("", ".")]
+    if not parts:
+        raise ValueError(f"Unsafe project path: {path}")
+    return Path(*parts)
 
 # ============================================================
 
@@ -680,6 +655,82 @@ def create_project_zip(
     return zip_path
 
 # ============================================================
+
+def _persist_quality_report(
+    *,
+    workspace: Path,
+    project_name: str,
+    workspace_name: str,
+    success: bool,
+    quality_gate: Dict[str, Any],
+    test_result: Optional[Dict[str, Any]],
+    run_result: Optional[Dict[str, Any]],
+    behavior_specification: Any,
+    zip_path: Optional[Path],
+    repair_attempts: int,
+    repair_history: list,
+    test_generation: Dict[str, Any],
+    tests_passed: bool,
+    application_passed: bool,
+    project_files: list,
+    zip_error: Optional[str] = None,
+) -> Optional[Path]:
+    """Persist an auditable quality report without affecting pipeline success.
+
+    Reports are stored beside project workspaces, never inside the deliverable.
+    Writes are atomic so an interrupted process does not leave a partial JSON file.
+    """
+    report_dir = workspace.parent / "quality_reports"
+    temporary_path: Optional[Path] = None
+    try:
+        report_dir.mkdir(parents=True, exist_ok=True)
+        report_path = report_dir / (
+            f"{workspace_name}_{uuid.uuid4().hex[:8]}.json"
+        )
+        temporary_path = report_path.with_suffix(".json.tmp")
+        report = {
+            "schema_version": 1,
+            "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+            "project_name": project_name,
+            "workspace_name": workspace_name,
+            "workspace_path": str(workspace),
+            "success": bool(success),
+            "quality_gate": quality_gate,
+            "tests": {
+                "passed": bool(tests_passed),
+                "result": test_result,
+            },
+            "application": {
+                "passed": bool(application_passed),
+                "result": run_result,
+            },
+            "behavior_specification": behavior_specification,
+            "test_generation": test_generation,
+            "repair_attempts": repair_attempts,
+            "repair_history": repair_history,
+            "project_files": project_files,
+            "artifact": {
+                "zip_created": bool(zip_path is not None and zip_path.is_file()),
+                "zip_path": str(zip_path) if zip_path else None,
+                "zip_error": zip_error,
+            },
+        }
+        temporary_path.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False, default=str) + "\n",
+            encoding="utf-8",
+        )
+        temporary_path.replace(report_path)
+        log(f"🧾 Quality report saved: {report_path}")
+        return report_path
+    except Exception as exc:
+        log(f"⚠️ Could not persist quality report: {exc}")
+        if temporary_path is not None:
+            try:
+                temporary_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+        return None
+
 
 # REPAIR CONTEXT
 
@@ -2300,14 +2351,39 @@ def execute_project(
     # ========================================================
 
     zip_path = None
+    zip_error = None
 
     if quality_gate.get("passed") is True:
-        zip_path = create_project_zip(workspace)
-        log(f"📦 Project ZIP created: {zip_path.name}")
+        try:
+            zip_path = create_project_zip(workspace)
+            log(f"📦 Project ZIP created: {zip_path.name}")
+        except Exception as exc:
+            zip_error = f"{type(exc).__name__}: {exc}"
+            success = False
+            log(f"❌ Project ZIP packaging failed: {zip_error}")
     else:
         log("⛔ ZIP packaging skipped because the quality gate failed.")
 
     final_files = sorted(_read_project(workspace).keys())
+    quality_report_path = _persist_quality_report(
+        workspace=workspace,
+        project_name=project_name,
+        workspace_name=workspace_name,
+        success=success,
+        quality_gate=quality_gate,
+        test_result=test_result,
+        run_result=run_result,
+        behavior_specification=behavior_specification,
+        zip_path=zip_path,
+        repair_attempts=repair_attempts,
+        repair_history=repair_history,
+        test_generation=test_generation,
+        tests_passed=tests_success,
+        application_passed=(application_success if run_command else True),
+        project_files=final_files,
+        zip_error=zip_error,
+    )
+
 
     # ========================================================
     # FINAL RESULT
@@ -2362,8 +2438,10 @@ def execute_project(
         "repair_attempts": repair_attempts,
         "repair_history": repair_history,
         "quality_gate": quality_gate,
+        "quality_report_path": str(quality_report_path) if quality_report_path else None,
         "zip_file": zip_path.name if zip_path else None,
         "zip_path": str(zip_path) if zip_path else None,
+        "zip_error": zip_error,
 
     }
 

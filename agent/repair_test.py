@@ -9,6 +9,9 @@ Purpose:
 This is a development validation script only.
 """
 
+import sys
+from pathlib import Path
+
 from agent.executor import execute_project
 
 
@@ -77,7 +80,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
 ''',
         },
 
@@ -197,27 +200,31 @@ def main():
                 )
 
     print()
-    print(
-        f"ZIP: {result.get('zip_file')}"
+    print(f"ZIP: {result.get('zip_path') or result.get('zip_file')}")
+    print(f"Quality report: {result.get('quality_report_path')}")
+    if result.get("zip_error"):
+        print(f"ZIP error: {result.get('zip_error')}")
+
+    zip_path = result.get("zip_path")
+    report_path = result.get("quality_report_path")
+    artifacts_ok = bool(
+        zip_path and Path(zip_path).is_file()
+        and report_path and Path(report_path).is_file()
     )
+    repair_ok = bool(result.get("success") and result.get("repair_attempts", 0) > 0)
+    passed = repair_ok and artifacts_ok
 
     print()
     print("=" * 70)
-
-    if (
-        result.get("success")
-        and result.get("repair_attempts", 0) > 0
-    ):
-        print(
-            "🎉 AUTONOMOUS REPAIR VERIFIED!"
-        )
+    if passed:
+        print("🎉 AUTONOMOUS REPAIR VERIFIED!")
     else:
-        print(
-            "❌ AUTONOMOUS REPAIR TEST FAILED."
-        )
-
+        print("❌ AUTONOMOUS REPAIR TEST FAILED.")
+        print(f"  repair_and_quality_gate_passed: {repair_ok}")
+        print(f"  zip_and_report_exist: {artifacts_ok}")
     print("=" * 70)
     print()
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

@@ -140,14 +140,31 @@ def _validate_required_files(workspace: Path, plan: Dict[str, Any] | None) -> Di
     if not isinstance(raw_files, list):
         return {"passed": True, "expected": [], "missing": []}
     expected = []
+    unsafe = []
     for item in raw_files:
         path = item.get("path") or item.get("filename") if isinstance(item, dict) else str(item)
         path = _normalize_path(path)
+        candidate = Path(path)
+        if (
+            not path
+            or "\\x00" in path
+            or path.startswith("/")
+            or candidate.is_absolute()
+            or ".." in candidate.parts
+            or re.match(r"^[A-Za-z]:", path)
+        ):
+            unsafe.append(path or "<empty>")
+            continue
         if path and not path.startswith("tests/"):
             expected.append(path)
     expected = sorted(set(expected))
     missing = [p for p in expected if not (workspace / p).is_file()]
-    return {"passed": not missing, "expected": expected, "missing": missing}
+    return {
+        "passed": not missing and not unsafe,
+        "expected": expected,
+        "missing": missing,
+        "unsafe_paths": sorted(set(unsafe)),
+    }
 def _validate_syntax(workspace: Path) -> Dict[str, Any]:
     files, errors = [], []
     for path in _iter_files(workspace):
@@ -550,6 +567,8 @@ def run_quality_gate(
         }
     required = _validate_required_files(workspace, plan)
     checks.append({"name": "required_files", "passed": required["passed"], "details": required})
+    if required.get("unsafe_paths"):
+        warnings.append("Rejected unsafe required-file path(s): " + str(len(required["unsafe_paths"])) + ".")
     syntax = _validate_syntax(workspace)
     checks.append({"name": "python_syntax", "passed": syntax["passed"], "details": syntax})
     structure = _validate_structure(workspace)
