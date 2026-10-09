@@ -7,24 +7,54 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    environment:
+      DOCKER_HOST: tcp://sandbox-engine:2375
+      AUTODEV_STATE_DIR: /data/tasks
     ports:
       - "8000:8000"
     volumes:
       - autodev_tasks:/data/tasks
       - autodev_projects:/app/generated
+    depends_on:
+      sandbox-engine:
+        condition: service_healthy
+    networks:
+      - autodev-network
     healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
-        ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 30s
+
+  # Dedicated Docker daemon for generated-code containers. It is NOT the host
+  # Docker socket. Do not publish port 2375 to the host or the public internet.
+  sandbox-engine:
+    image: docker:29-dind
+    container_name: autodev-sandbox-engine
+    privileged: true
+    restart: unless-stopped
+    environment:
+      DOCKER_TLS_CERTDIR: ""
+    command: ["dockerd", "--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock"]
+    volumes:
+      - sandbox_engine_data:/var/lib/docker
+    expose:
+      - "2375"
+    networks:
+      - autodev-network
+    healthcheck:
+      test: ["CMD", "docker", "info"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
       start_period: 20s
+
+networks:
+  autodev-network:
+    driver: bridge
 
 volumes:
   autodev_tasks:
   autodev_projects:
+  sandbox_engine_data:

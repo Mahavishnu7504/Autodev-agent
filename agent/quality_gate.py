@@ -332,7 +332,27 @@ def _special_evidence(requirement: str, source: str, tests: str) -> tuple[bool, 
     if "unit test" in req or "unittest" in req or "automated test" in req:
         if tests.strip() and ("unittest" in tests.lower() or "testcase" in tests.lower()):
             return True, "Automated unittest suite detected."
-    if "standard numeric semantics" in req or "normal arithmetic" in req or "standard semantics" in req:
+    if (
+        "standard arithmetic" in req
+        or "provided operands" in req
+        or "standard numeric semantics" in req
+        or "normal arithmetic" in req
+        or "standard semantics" in req
+    ):
+        operations = ("add", "subtract", "multiply", "divide")
+        source_has_operations = all(
+            re.search(rf"\bdef\s+{name}\s*\(", source)
+            for name in operations
+        )
+        tests_exercise_operations = all(
+            re.search(rf"\b{name}\s*\(", tests, re.IGNORECASE)
+            for name in operations
+        )
+        arithmetic_symbols = any(
+            symbol in source for symbol in (" + ", " - ", " * ", " / ")
+        )
+        if source_has_operations and tests_exercise_operations and arithmetic_symbols:
+            return True, "All four arithmetic operations have implementation and test evidence."
         arithmetic_ops = any(op in source for op in (" + ", " - ", " * ", " / "))
         tested_ops = any(name in tests.lower() for name in ("add", "subtract", "multiply", "divide"))
         if arithmetic_ops and tested_ops:

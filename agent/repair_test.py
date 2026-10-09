@@ -30,6 +30,27 @@ BROKEN_PLAN = {
         "-s tests -v"
     ),
 
+    # Shared behavior contract required by the strict quality gate.
+    "behavior_specification": {
+        "goal": (
+            "Demonstrate a calculator whose add function "
+            "returns the sum of two numbers."
+        ),
+        "features": [
+            "The add(a, b) function returns the sum of a and b."
+        ],
+        "inputs": [
+            "The add function accepts two numeric arguments."
+        ],
+        "outputs": [
+            "The demo application prints the addition result."
+        ],
+        "business_rules": [
+            "Addition returns the mathematical sum of its arguments."
+        ],
+        "edge_cases": [],
+    },
+
     "files": [
         {
             "path": "app/__init__.py",
@@ -162,6 +183,18 @@ def main():
                 else "FAIL"
             )
         )
+
+    quality_gate = result.get("quality_gate")
+    if isinstance(quality_gate, dict):
+        print()
+        print("Quality gate:")
+        print(f"  Passed: {quality_gate.get('passed')}")
+        for check in quality_gate.get("checks", []):
+            if isinstance(check, dict):
+                print(
+                    f"  - {check.get('name')}: "
+                    f"{'PASS' if check.get('passed') else 'FAIL'}"
+                )
 
     print()
     print(

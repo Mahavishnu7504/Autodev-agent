@@ -15,6 +15,7 @@ from agent.logger import log
 from agent.project_repair import repair_project
 
 from agent.test_generator import generate_tests
+from agent.sandbox_runner import run_in_sandbox
 
 # ============================================================
 
@@ -213,90 +214,29 @@ def _safe_relative_path(path: str) -> Path:
 # ============================================================
 
 def _run_command(
-
     command: str,
-
     workspace: Path,
-
     timeout: int = COMMAND_TIMEOUT,
-
 ) -> Dict[str, Any]:
-
-    log(
-
-        f"▶️ Running: {command}"
-
+    """Run generated project commands in the isolated Docker sandbox."""
+    log(f"🔒 Sandbox execution: {command}")
+    result = run_in_sandbox(
+        project_path=workspace,
+        run_command=command,
+        timeout=timeout,
     )
-
-    try:
-
-        result = subprocess.run(
-
-            command,
-
-            cwd=str(workspace),
-
-            shell=True,
-
-            capture_output=True,
-
-            text=True,
-
-            timeout=timeout,
-
-        )
-
-        return {
-
-            "success": result.returncode == 0,
-
-            "command": command,
-
-            "stdout": result.stdout,
-
-            "stderr": result.stderr,
-
-            "return_code": result.returncode,
-
-        }
-
-    except subprocess.TimeoutExpired:
-
-        return {
-
-            "success": False,
-
-            "command": command,
-
-            "stdout": "",
-
-            "stderr": (
-
-                f"Command timed out after "
-
-                f"{timeout} seconds."
-
-            ),
-
-            "return_code": None,
-
-        }
-
-    except Exception as exc:
-
-        return {
-
-            "success": False,
-
-            "command": command,
-
-            "stdout": "",
-
-            "stderr": str(exc),
-
-            "return_code": None,
-
-        }
+    # Keep the result shape compatible with the existing diagnosis/repair UI.
+    return {
+        "success": bool(result.get("success")),
+        "command": command,
+        "stdout": str(result.get("stdout", "")),
+        "stderr": str(result.get("stderr", "")),
+        "return_code": result.get("exit_code"),
+        "timed_out": bool(result.get("timed_out", False)),
+        "duration_seconds": result.get("duration_seconds", 0),
+        "sandbox": True,
+        "sandbox_error": result.get("error"),
+    }
 
 # ============================================================
 
@@ -305,42 +245,50 @@ def _run_command(
 # ============================================================
 
 def _write_project(
-
     workspace: Path,
-
     files: Dict[str, str],
-
 ) -> None:
-
+    """Write generated files and ensure Python package initializers exist."""
     for relative_path, content in files.items():
-
-        safe_path = _safe_relative_path(
-
-            relative_path
-
-        )
+        safe_path = _safe_relative_path(relative_path)
 
         if _is_ignored_path(safe_path):
-
             continue
 
         destination = workspace / safe_path
-
         destination.parent.mkdir(
-
             parents=True,
-
             exist_ok=True,
-
         )
 
         destination.write_text(
-
             str(content),
-
             encoding="utf-8",
-
         )
+
+    # Ensure generated app/ packages are valid without overwriting
+    # an initializer supplied by the planner.
+    app_dir = workspace / "app"
+    if app_dir.is_dir() and any(app_dir.rglob("*.py")):
+        init_file = app_dir / "__init__.py"
+        if not init_file.exists():
+            init_file.write_text(
+                '"""Application package."""\n',
+                encoding="utf-8",
+            )
+            log("📦 Created missing app/__init__.py")
+
+    # Apply the same safeguard to generated src/ packages.
+    src_dir = workspace / "src"
+    if src_dir.is_dir() and any(src_dir.rglob("*.py")):
+        init_file = src_dir / "__init__.py"
+        if not init_file.exists():
+            init_file.write_text(
+                '"""Source package."""\n',
+                encoding="utf-8",
+            )
+            log("📦 Created missing src/__init__.py")
+
 
 def _read_project(
 
@@ -2293,8 +2241,57 @@ def execute_project(
         log("🛡️ AUTONOMOUS QUALITY GATE PASSED")
     else:
         log("❌ AUTONOMOUS QUALITY GATE FAILED")
+
         for failed_check in quality_gate.get("failed_checks", []):
             log(f"   ❌ {failed_check}")
+
+        # Detailed evidence only; all quality-gate thresholds remain unchanged.
+        coverage = quality_gate.get("coverage", {})
+        if not coverage:
+            checks = quality_gate.get("checks", [])
+            if isinstance(checks, list):
+                for check in checks:
+                    if isinstance(check, dict) and check.get("name") == "requirement_coverage":
+                        coverage = check.get("details", {})
+                        break
+
+        if isinstance(coverage, dict) and coverage:
+            ratio = coverage.get("coverage_ratio", 0)
+            try:
+                ratio_text = f"{float(ratio):.1%}"
+            except (TypeError, ValueError):
+                ratio_text = str(ratio)
+
+            try:
+                threshold_text = f"{float(coverage.get('threshold', 0.70)):.0%}"
+            except (TypeError, ValueError):
+                threshold_text = "70%"
+
+            log(
+                "📊 Requirement coverage: "
+                f"{coverage.get('covered', 0)}/"
+                f"{coverage.get('total', 0)} ({ratio_text}); "
+                f"threshold={threshold_text}"
+            )
+            log(
+                "📊 Critical requirements: "
+                f"{coverage.get('critical_covered', 0)}/"
+                f"{coverage.get('critical_total', 0)}"
+            )
+
+            for item in coverage.get("details", []):
+                if not isinstance(item, dict) or item.get("passed", False):
+                    continue
+                log(
+                    f"   ⚠️ Uncovered requirement #{item.get('id', '?')}: "
+                    f"{item.get('requirement', '(missing requirement text)')}"
+                )
+                log(
+                    "      Evidence: "
+                    f"{item.get('reason', 'Insufficient implementation/test evidence.')}"
+                )
+                log(f"      Source hits: {item.get('implementation_evidence', [])}")
+                log(f"      Test hits: {item.get('test_evidence', [])}")
 
     success = bool(success and quality_gate.get("passed", False))
 
@@ -2302,21 +2299,15 @@ def execute_project(
     # ZIP FINAL DELIVERABLE
     # ========================================================
 
-    zip_path = create_project_zip(workspace)
+    zip_path = None
 
-    final_files = sorted(
-        _read_project(
-            workspace
-        ).keys()
+    if quality_gate.get("passed") is True:
+        zip_path = create_project_zip(workspace)
+        log(f"📦 Project ZIP created: {zip_path.name}")
+    else:
+        log("⛔ ZIP packaging skipped because the quality gate failed.")
 
-    )
-
-    log(
-
-        f"📦 Project ZIP created: "
-        f"{zip_path.name}"
-
-    )
+    final_files = sorted(_read_project(workspace).keys())
 
     # ========================================================
     # FINAL RESULT
@@ -2371,11 +2362,8 @@ def execute_project(
         "repair_attempts": repair_attempts,
         "repair_history": repair_history,
         "quality_gate": quality_gate,
-        "zip_file": zip_path.name,
-        "zip_path": str(
-            zip_path
-
-        ),
+        "zip_file": zip_path.name if zip_path else None,
+        "zip_path": str(zip_path) if zip_path else None,
 
     }
 

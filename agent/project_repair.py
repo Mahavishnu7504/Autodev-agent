@@ -39,21 +39,31 @@ def _extract_json(text: str) -> Dict[str, Any]:
         text = re.sub(r"^```(?:json)?\s*", "", text, flags=re.I)
         text = re.sub(r"\s*```$", "", text)
     try:
-        return json.loads(text)
+        payload = json.loads(text)
     except json.JSONDecodeError:
         start = text.find("{")
         end = text.rfind("}")
-        if start >= 0 and end > start:
-            return json.loads(text[start:end + 1])
-    raise ValueError("Repair engine returned invalid JSON.")
+        if start < 0 or end <= start:
+            raise ValueError("Repair engine returned invalid JSON.")
+        try:
+            payload = json.loads(text[start:end + 1])
+        except json.JSONDecodeError as exc:
+            raise ValueError("Repair engine returned invalid JSON.") from exc
+
+    if not isinstance(payload, dict):
+        raise ValueError("Repair engine JSON root must be an object.")
+    return payload
 
 
 def _validate_patch(payload: Dict[str, Any]) -> Dict[str, Any]:
     files = payload.get("files")
     if not isinstance(files, list):
         raise ValueError("Repair response must contain a files list.")
+    if not files:
+        raise ValueError("Repair response contains an empty files list.")
 
     clean = []
+    seen_paths = set()
     for item in files:
         if not isinstance(item, dict):
             continue
@@ -62,18 +72,31 @@ def _validate_patch(payload: Dict[str, Any]) -> Dict[str, Any]:
         if not path or content is None or not str(content).strip():
             continue
 
-        normalized = path.replace("\\", "/").lstrip("/")
-        candidate = Path(normalized)
-        if ".." in candidate.parts or candidate.is_absolute():
+        raw_path = path.replace("\\", "/")
+        candidate = Path(raw_path)
+        normalized = raw_path
+        if (
+            raw_path.startswith("/")
+            or candidate.is_absolute()
+            or ".." in candidate.parts
+            or re.match(r"^[A-Za-z]:", raw_path)
+        ):
             raise ValueError(f"Unsafe repair path: {path}")
 
-        clean.append({
-            "path": normalized,
-            "content": str(content),
-        })
+        if normalized == "tests" or normalized.startswith("tests/"):
+            log(f"⚠️ Ignoring repair change to protected test file: {normalized}")
+            continue
+
+        if normalized in seen_paths:
+            raise ValueError(f"Duplicate repair path: {normalized}")
+        seen_paths.add(normalized)
+        clean.append({"path": normalized, "content": str(content)})
 
     if not clean:
-        raise ValueError("Repair engine returned no usable file changes.")
+        raise ValueError(
+            "Repair returned no permitted application-file changes; "
+            "generated tests are protected from autonomous repair."
+        )
 
     return {
         "files": clean,
@@ -168,7 +191,18 @@ Rules:
 14. Paths must be relative to the project root.
 15. If the failure is an import/structure error, repair the import or structure rather than rewriting the project architecture.
 16. If the failure is a logic error, change implementation behavior rather than weakening validation.
-17. If the application has a sensible no-argument/default execution path, preserve or restore it so AutoDev's configured run command can complete.
+16a. Diagnose state and persistence correctly:
+     - Do not claim an in-memory manager persists across separate CLI invocations.
+     - If persistence is required by the task/behavior specification, implement it
+       with a small deterministic storage mechanism compatible with the project.
+     - If persistence was not requested, preserve the in-memory contract and fix
+       implementation/test mismatches without inventing persistence.
+     - Ensure demo output assertions correspond to text the app actually prints.
+17. AutoDev runs the configured run command without adding arguments.
+    If failure is caused by missing CLI arguments, prefer a valid configured
+    smoke command or a meaningful deterministic no-argument help/demo path.
+    Do NOT merely print usage and exit 0 if that hides that no meaningful
+    application behavior ran. Preserve requested features and CLI contract.
 18. Never replace an existing Python package directory with a same-named .py module.
 
 STRUCTURE SAFETY:

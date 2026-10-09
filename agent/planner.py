@@ -1,5 +1,4 @@
 
-
 import json
 import re
 import time
@@ -569,6 +568,14 @@ PROJECT RULES
 
 10. run_command must work from the project root.
 
+10a. AUTODEV SMOKE-RUN CONTRACT:
+     AutoDev executes run_command without adding CLI arguments. The command
+     MUST be deterministic, non-interactive, and exit 0 when the project is
+     correct. For a CLI app, use a valid representative invocation with safe
+     sample arguments, or a meaningful no-argument help/demo path that exits 0.
+     Never use a command that predictably fails because required arguments
+     were omitted. Never wait for user input.
+
 11. The generated application must actually implement the
     behavior_specification.
 
@@ -608,6 +615,10 @@ E. No hidden requirement was added to the project.
 F. The specification and source code agree.
 
 G. The run command points to an existing executable entry point.
+   It must also be a deterministic smoke command that exits 0.
+
+J. A CLI run command must supply valid sample arguments, or the no-argument
+   path must execute meaningful help/demo behavior and exit 0.
 
 H. Python imports are internally consistent.
 

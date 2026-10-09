@@ -192,6 +192,7 @@ def _validate_tests(
         )
 
     clean = []
+    seen_paths = set()
 
     for item in tests:
 
@@ -209,15 +210,16 @@ def _validate_tests(
         if not path or not content:
             continue
 
-        normalized = (
-            path
-            .replace("\\", "/")
-            .lstrip("/")
-        )
+        raw_path = path.replace("\\", "/")
+        normalized = raw_path.lstrip("/")
+        candidate = Path(raw_path)
 
-        if ".." in Path(
-            normalized
-        ).parts:
+        if (
+            raw_path.startswith("/")
+            or candidate.is_absolute()
+            or ".." in candidate.parts
+            or re.match(r"^[A-Za-z]:", raw_path)
+        ):
 
             raise ValueError(
                 f"Unsafe generated test path: {path}"
@@ -230,6 +232,18 @@ def _validate_tests(
 
         if not normalized.endswith(".py"):
             normalized += ".py"
+
+        if normalized in seen_paths:
+            raise ValueError(f"Duplicate generated test path: {normalized}")
+        seen_paths.add(normalized)
+
+        try:
+            compile(content, normalized, "exec")
+        except SyntaxError as exc:
+            raise ValueError(
+                f"Generated test file has invalid Python syntax "
+                f"({normalized}: {exc})"
+            ) from exc
 
         clean.append({
             "path": normalized,
@@ -497,6 +511,27 @@ TEST GENERATION RULES
 22. If the project contains a CLI/demo, test callable
     functions where possible instead of depending only
     on console output.
+
+22a. CLI TEST CONSISTENCY:
+     - Read the entry point, manager/storage implementation, run command, and
+       behavior specification before writing CLI tests.
+     - Distinguish state within one process from state across separate CLI
+       invocations. Never assume in-memory objects persist across processes.
+     - Without a persistence layer, never add an item in one invocation and
+       expect it in another. Test invocations independently, or exercise multiple
+       operations through one shared object/API if that is the public contract.
+     - If persistence is explicitly required by the task/specification, test it
+       across invocations using the documented interface.
+     - For end-to-end CLI tests, use the configured command and subprocess where
+       appropriate, accounting for working directory and package imports.
+     - Match actual argument parsing and error semantics; argparse commonly exits
+       with code 2 for invalid syntax. Do not invent exit codes or exact messages
+       unless the contract specifies them.
+     - Do not assert output for actions the implementation does not print.
+       Demo assertions must match observable output and requested behavior.
+     - Tests must be isolated and order-independent; each test establishes its own
+       state and never depends on another test's side effects.
+     - Do not fabricate CLI behavior with mocks or write contradictory tests.
 
 23. Normally generate 1-4 focused test files.
 
