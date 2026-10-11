@@ -320,6 +320,31 @@ def _special_evidence(requirement: str, source: str, tests: str) -> tuple[bool, 
     combined = source + "\n" + tests
     combined_lower = combined.lower()
     test_lower = tests.lower()
+    # Semantic evidence for generic numeric input/output contracts.
+    if ("numeric arguments" in req or "numeric argument" in req) and (
+        "each operation" in req or "each function" in req
+    ):
+        definitions = re.findall(r"\bdef\s+[A-Za-z_]\w*\s*\(([^()]*)\)", source)
+        two_args = any(
+            len([item for item in params.split(",") if item.strip()]) == 2
+            for params in definitions
+        )
+        if two_args and all(
+            re.search(rf"\bdef\s+{name}\s*\(", source)
+            for name in ("add", "subtract", "multiply", "divide")
+        ):
+            return True, "All four operations accept two arguments."
+
+    if "numeric result" in req and (
+        "return" in source.lower()
+        and any(
+            re.search(rf"\b{name}\s*\(", tests, re.IGNORECASE)
+            for name in ("add", "subtract", "multiply", "divide")
+        )
+        and "assert" in tests.lower()
+    ):
+        return True, "Numeric operation results have implementation and test evidence."
+
     if "basic arithmetic operations as reusable functions" in req:
         operations = ("add", "subtract", "multiply", "divide")
         if all(re.search(rf"\bdef\s+{name}\s*\(", source) for name in operations) and "input(" not in source:

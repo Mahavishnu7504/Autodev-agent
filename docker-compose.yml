@@ -1,4 +1,4 @@
-services:
+﻿services:
   autodev:
     build:
       context: .
@@ -8,13 +8,16 @@ services:
     env_file:
       - .env
     environment:
-      DOCKER_HOST: tcp://sandbox-engine:2375
+      DOCKER_HOST: tcp://sandbox-engine:2376
+      DOCKER_TLS_VERIFY: "1"
+      DOCKER_CERT_PATH: /certs/client
       AUTODEV_STATE_DIR: /data/tasks
     ports:
       - "8000:8000"
     volumes:
       - autodev_tasks:/data/tasks
       - autodev_projects:/app/generated
+      - sandbox_engine_certs:/certs:ro
     depends_on:
       sandbox-engine:
         condition: service_healthy
@@ -27,20 +30,19 @@ services:
       retries: 3
       start_period: 30s
 
-  # Dedicated Docker daemon for generated-code containers. It is NOT the host
-  # Docker socket. Do not publish port 2375 to the host or the public internet.
   sandbox-engine:
     image: docker:29-dind
     container_name: autodev-sandbox-engine
     privileged: true
     restart: unless-stopped
     environment:
-      DOCKER_TLS_CERTDIR: ""
-    command: ["dockerd", "--host=tcp://0.0.0.0:2375", "--host=unix:///var/run/docker.sock"]
+      DOCKER_TLS_CERTDIR: /certs
+      DOCKER_TLS_SAN: DNS:sandbox-engine
     volumes:
       - sandbox_engine_data:/var/lib/docker
+      - sandbox_engine_certs:/certs
     expose:
-      - "2375"
+      - "2376"
     networks:
       - autodev-network
     healthcheck:
@@ -58,3 +60,7 @@ volumes:
   autodev_tasks:
   autodev_projects:
   sandbox_engine_data:
+  sandbox_engine_certs:
+
+
+
