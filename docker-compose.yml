@@ -13,7 +13,7 @@
       DOCKER_CERT_PATH: /certs/client
       AUTODEV_STATE_DIR: /data/tasks
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - autodev_tasks:/data/tasks
       - autodev_projects:/app/generated

@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+import base64
+import os
 import re
+import secrets
 import shutil
 import time
 
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 from pydantic import BaseModel, Field
 
 from agent.executor import (
@@ -41,6 +44,53 @@ app = FastAPI(
     ),
     version=APP_VERSION,
 )
+
+
+# AUTODEV_AUTH_MIDDLEWARE
+@app.middleware("http")
+async def require_api_authentication(request: Request, call_next):
+    # Docker and local monitoring must be able to check service health.
+    if request.url.path == "/health":
+        return await call_next(request)
+
+    expected_user = os.getenv("AUTODEV_USERNAME", "")
+    expected_password = os.getenv("AUTODEV_PASSWORD", "")
+
+    if not expected_user or not expected_password:
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "API authentication is not configured."},
+        )
+
+    authorization = request.headers.get("authorization", "")
+    supplied_user = ""
+    supplied_password = ""
+
+    try:
+        if authorization.lower().startswith("basic "):
+            decoded = base64.b64decode(
+                authorization[6:].strip(), validate=True
+            ).decode("utf-8")
+            supplied_user, separator, supplied_password = decoded.partition(":")
+            if not separator:
+                supplied_user = ""
+                supplied_password = ""
+    except (ValueError, UnicodeDecodeError):
+        supplied_user = ""
+        supplied_password = ""
+
+    user_ok = secrets.compare_digest(supplied_user, expected_user)
+    password_ok = secrets.compare_digest(supplied_password, expected_password)
+
+    if not (user_ok and password_ok):
+        return JSONResponse(
+            status_code=401,
+            content={"detail": "Authentication required."},
+            headers={"WWW-Authenticate": 'Basic realm="AutoDev Agent"'},
+        )
+
+    return await call_next(request)
+
 
 task_manager = TaskManager()
 
@@ -526,83 +576,6 @@ def list_tasks(limit: int = 20):
     }
 
 
-@app.get("/tasks/{task_id}")
-def get_task_status(task_id: str):
-    """Return live status, logs and result."""
-
-    record = task_manager.get_task(task_id)
-
-    if record is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found.",
-        )
-
-    return record
-
-
-@app.post("/tasks/{task_id}/cancel")
-def cancel_task(task_id: str):
-    """Request cancellation of a queued or running task."""
-
-    try:
-        record = task_manager.cancel_task(task_id)
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found.",
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Cancellation failed: {exc}",
-        )
-
-    return {
-        "success": True,
-        "task_id": task_id,
-        "status": record.get("status"),
-        "phase": record.get("phase"),
-        "progress": record.get("progress"),
-        "cancel_requested": record.get("cancel_requested", False),
-        "task": record,
-    }
-
-
-@app.post("/tasks/{task_id}/retry", status_code=202)
-def retry_task(task_id: str):
-    """Create and start a new task from a terminal task."""
-
-    try:
-        record = task_manager.retry_task(task_id)
-    except KeyError:
-        raise HTTPException(
-            status_code=404,
-            detail="Task not found.",
-        )
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=409,
-            detail=str(exc),
-        )
-    except Exception as exc:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Retry failed: {exc}",
-        )
-
-    return {
-        "status": "accepted",
-        "task_id": record["task_id"],
-        "retry_of": record.get("retry_of"),
-        "phase": record.get("phase"),
-        "progress": record.get("progress"),
-        "status_url": f"/tasks/{record['task_id']}",
-        "cancel_url": f"/tasks/{record['task_id']}/cancel",
-        "retry_url": f"/tasks/{record['task_id']}/retry",
-    }
-
-
 @app.get("/tasks/stats")
 def task_stats():
     """Return compact task execution statistics."""
@@ -677,6 +650,83 @@ def task_stats():
         "cancelled": counts["cancelled"],
         "average_duration_seconds": average_duration,
         "success_rate_percent": success_rate,
+    }
+
+
+@app.get("/tasks/{task_id}")
+def get_task_status(task_id: str):
+    """Return live status, logs and result."""
+
+    record = task_manager.get_task(task_id)
+
+    if record is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found.",
+        )
+
+    return record
+
+
+@app.post("/tasks/{task_id}/cancel")
+def cancel_task(task_id: str):
+    """Request cancellation of a queued or running task."""
+
+    try:
+        record = task_manager.cancel_task(task_id)
+    except KeyError:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found.",
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Cancellation failed: {exc}",
+        )
+
+    return {
+        "success": True,
+        "task_id": task_id,
+        "status": record.get("status"),
+        "phase": record.get("phase"),
+        "progress": record.get("progress"),
+        "cancel_requested": record.get("cancel_requested", False),
+        "task": record,
+    }
+
+
+@app.post("/tasks/{task_id}/retry", status_code=202)
+def retry_task(task_id: str):
+    """Create and start a new task from a terminal task."""
+
+    try:
+        record = task_manager.retry_task(task_id)
+    except KeyError:
+        raise HTTPException(
+            status_code=404,
+            detail="Task not found.",
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=409,
+            detail=str(exc),
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Retry failed: {exc}",
+        )
+
+    return {
+        "status": "accepted",
+        "task_id": record["task_id"],
+        "retry_of": record.get("retry_of"),
+        "phase": record.get("phase"),
+        "progress": record.get("progress"),
+        "status_url": f"/tasks/{record['task_id']}",
+        "cancel_url": f"/tasks/{record['task_id']}/cancel",
+        "retry_url": f"/tasks/{record['task_id']}/retry",
     }
 
 
