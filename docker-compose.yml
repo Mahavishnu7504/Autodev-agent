@@ -8,6 +8,8 @@
     env_file:
       - .env
     environment:
+      # Docker-in-Docker TLS endpoint. Keep this aligned with sandbox-engine
+      # and do not publish port 2376 to the host or internet.
       DOCKER_HOST: tcp://sandbox-engine:2376
       DOCKER_TLS_VERIFY: "1"
       DOCKER_CERT_PATH: /certs/client
@@ -33,6 +35,9 @@
   sandbox-engine:
     image: docker:29-dind
     container_name: autodev-sandbox-engine
+    # Privileged mode is required by Docker-in-Docker. Use only for a
+    # controlled single-user development/resume demo, never as a public
+    # multi-tenant execution service.
     privileged: true
     restart: unless-stopped
     environment:
@@ -61,6 +66,3 @@ volumes:
   autodev_projects:
   sandbox_engine_data:
   sandbox_engine_certs:
-
-
-

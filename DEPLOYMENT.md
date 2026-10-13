@@ -1,56 +1,67 @@
 # AutoDev Agent — Deployment
 
-## Local Docker test
+## Local Docker Compose setup
 
 1. Copy `.env.example` to `.env`.
-2. Put your Groq API key in `.env`.
-3. Build and start:
+2. Add your Groq API key and the other required local settings to `.env`.
+3. Start the API and sandbox engine:
 
 ```powershell
-docker compose up --build
+docker compose up --build -d
+docker compose ps
+docker compose logs -f autodev
 ```
 
 4. Open:
 
-- http://127.0.0.1:8000/dashboard
-- http://127.0.0.1:8000/docs
-- http://127.0.0.1:8000/health
-- http://127.0.0.1:8000/system/status
+- Dashboard: http://127.0.0.1:8000/dashboard
+- API docs: http://127.0.0.1:8000/docs
+- Health: http://127.0.0.1:8000/health
+- System status: http://127.0.0.1:8000/system/status
 
-## Stop
+To stop without deleting saved volumes:
 
 ```powershell
 docker compose down
 ```
 
-The named Docker volumes preserve task state and generated projects.
+**Do not use `docker compose down -v`** unless you intentionally want to delete named-volume data.
 
-## Important security boundary
+## Docker sandbox configuration
 
-The current AutoDev executor runs generated Python locally inside the application runtime.
+The API container uses the Docker CLI and connects to the separate `sandbox-engine`
+service over TLS at `tcp://sandbox-engine:2376`. The Compose file configures
+`DOCKER_HOST`, `DOCKER_TLS_VERIFY`, and `DOCKER_CERT_PATH` consistently.
 
-Therefore this Docker setup is a **deployment packaging milestone, not a claim of safe public multi-tenant execution**.
+The Docker daemon port is not published to the host. The API port is bound to
+`127.0.0.1` for local use.
 
-Before exposing arbitrary generated-code execution to untrusted public users, add an execution sandbox with:
+## Render deployment limitation
 
-- isolated container/process per generated project
-- CPU and memory limits
-- hard execution timeout
-- isolated writable filesystem
-- restricted/no network access by default
-- non-root execution
-- process cleanup
-- per-job resource quotas
+These Compose settings do **not** make Docker-in-Docker available on Render's
+ordinary web service. Render must not be assumed to provide a reachable Docker
+daemon or permit a privileged sidecar. If `/health` works on Render but tasks
+fail with `Docker daemon is unavailable or the Docker CLI is missing`, the
+sandbox is not connected in that environment.
 
-Do not mount the Docker host socket into the AutoDev API container.
+Do not remove the sandbox check, report a failed task as successful, or execute
+arbitrary generated code directly in the public API process to work around this.
 
-## Production checklist
+For hosted execution, connect AutoDev to a separately hosted, properly isolated
+sandbox service, or keep code execution in the local Compose environment and
+present the hosted Render service as a limited demo until the remote sandbox is
+configured.
 
-- Keep `GROQ_API_KEY` in the hosting platform's secret manager.
-- Put the API behind HTTPS/reverse proxy.
-- Add authentication before public access.
-- Add request rate limiting.
-- Add sandboxed code execution before accepting untrusted users.
-- Keep generated-project storage persistent.
-- Keep task state persistent.
-- Monitor `/health` and `/system/status`.
+## Security boundary
+
+The Docker-in-Docker service uses privileged mode. Treat this Compose stack as
+a controlled single-user development/resume demo, not a safe public
+multi-tenant execution platform.
+
+Before accepting arbitrary code from untrusted public users, ensure execution
+uses disposable isolated containers with CPU/memory limits, hard timeouts,
+restricted network access, non-root users, process cleanup, and per-job quotas.
+Never mount the host Docker socket into the public API container.
+
+Keep `GROQ_API_KEY` and authentication secrets in `.env` locally and in the
+hosting provider's secret settings remotely. Never commit secrets.

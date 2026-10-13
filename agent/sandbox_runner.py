@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import base64
 import io
+import json
 import os
 import subprocess
 import tarfile
 import time
+import urllib.error
+import urllib.request
 import uuid
 from pathlib import Path
 
@@ -58,7 +62,7 @@ def _project_archive(source: Path) -> bytes:
     return buffer.getvalue()
 
 
-def run_in_sandbox(
+def _run_local_in_sandbox(
     project_path: str | Path,
     run_command: str,
     timeout: int = DEFAULT_TIMEOUT,
@@ -202,7 +206,106 @@ def run_in_sandbox(
                 pass
 
 
+
+def _remote_run(
+    source: Path,
+    run_command: str,
+    timeout: int,
+    memory: str,
+    cpus: str,
+    image: str,
+) -> dict:
+    """Send a project archive to an authenticated, Docker-enabled runner."""
+    started = time.monotonic()
+    base_url = os.getenv("AUTODEV_RUNNER_URL", "").strip().rstrip("/")
+    token = os.getenv("AUTODEV_RUNNER_TOKEN", "").strip()
+    if not base_url or not token:
+        return _result(
+            False, run_command,
+            stderr="Remote runner is configured incompletely. Set AUTODEV_RUNNER_URL and AUTODEV_RUNNER_TOKEN.",
+            error="remote_runner_not_configured",
+        )
+    try:
+        archive_bytes = _project_archive(source)
+        max_bytes = int(os.getenv("AUTODEV_RUNNER_MAX_ARCHIVE_BYTES", str(8 * 1024 * 1024)))
+        if len(archive_bytes) > max_bytes:
+            return _result(False, run_command,
+                           stderr=f"Project archive is too large ({len(archive_bytes)} bytes; limit {max_bytes}).",
+                           duration=time.monotonic() - started, error="project_archive_too_large")
+        encoded_command = base64.urlsafe_b64encode(run_command.encode("utf-8")).decode("ascii")
+        request = urllib.request.Request(
+            f"{base_url}/v1/execute",
+            data=archive_bytes,
+            headers={
+                "Content-Type": "application/x-tar",
+                "X-Autodev-Token": token,
+                "X-Autodev-Command": encoded_command,
+                "X-Autodev-Timeout": str(timeout),
+                "X-Autodev-Memory": str(memory),
+                "X-Autodev-Cpus": str(cpus),
+                "X-Autodev-Image": str(image),
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(request, timeout=timeout + 90) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("Runner returned an invalid response.")
+        payload.setdefault("command", run_command)
+        payload.setdefault("duration_seconds", round(time.monotonic() - started, 3))
+        payload.setdefault("success", False)
+        return payload
+    except urllib.error.HTTPError as exc:
+        try:
+            detail = exc.read().decode("utf-8", errors="replace")[:2000]
+        except Exception:
+            detail = str(exc)
+        return _result(False, run_command, stderr=f"Remote runner returned HTTP {exc.code}: {detail}",
+                       duration=time.monotonic() - started, error="remote_runner_http_error")
+    except (OSError, TimeoutError, ValueError, json.JSONDecodeError) as exc:
+        return _result(False, run_command, stderr=f"Remote runner request failed: {exc}",
+                       duration=time.monotonic() - started, error="remote_runner_unavailable")
+
+
+def run_in_sandbox(
+    project_path: str | Path,
+    run_command: str,
+    timeout: int = DEFAULT_TIMEOUT,
+    memory: str = DEFAULT_MEMORY,
+    cpus: str = DEFAULT_CPUS,
+    image: str = DEFAULT_IMAGE,
+) -> dict:
+    """Use the configured remote runner in production, or local Docker otherwise."""
+    source = Path(project_path).resolve()
+    if not source.is_dir():
+        return _result(False, run_command, stderr=f"Project directory does not exist: {source}", error="missing_project")
+    if not run_command or not run_command.strip():
+        return _result(False, run_command, stderr="Execution command is empty.", error="empty_command")
+    try:
+        timeout = max(1, min(int(timeout), 300))
+    except (TypeError, ValueError):
+        timeout = DEFAULT_TIMEOUT
+    if os.getenv("AUTODEV_RUNNER_URL", "").strip():
+        return _remote_run(source, run_command, timeout, memory, cpus, image)
+    return _run_local_in_sandbox(source, run_command, timeout, memory, cpus, image)
+
 def sandbox_healthcheck() -> dict:
+    remote_url = os.getenv("AUTODEV_RUNNER_URL", "").strip().rstrip("/")
+    if remote_url:
+        token = os.getenv("AUTODEV_RUNNER_TOKEN", "").strip()
+        if not token:
+            return {"available": False, "docker": "unavailable", "transport": "remote",
+                    "error": "AUTODEV_RUNNER_TOKEN is missing"}
+        try:
+            request = urllib.request.Request(
+                f"{remote_url}/health", headers={"X-Autodev-Token": token}, method="GET"
+            )
+            with urllib.request.urlopen(request, timeout=8) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+            return {**payload, "transport": "authenticated_remote_runner"}
+        except Exception as exc:
+            return {"available": False, "docker": "unavailable",
+                    "transport": "authenticated_remote_runner", "error": str(exc)[:500]}
     available = _docker_available()
     return {
         "available": available,
@@ -212,5 +315,5 @@ def sandbox_healthcheck() -> dict:
         "default_cpus": DEFAULT_CPUS,
         "network": "disabled for generated-code containers",
         "container_cleanup": True,
-        "transport": "streamed tar + docker exec; no bind mounts",
+        "transport": "local_docker_streamed_tar",
     }

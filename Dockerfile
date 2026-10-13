@@ -1,19 +1,16 @@
-
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    AUTODEV_STATE_DIR=/data/tasks \
-    DOCKER_HOST=tcp://sandbox-engine:2375
+    AUTODEV_STATE_DIR=/data/tasks
 
 WORKDIR /app
 
-# Install Docker client separately from the daemon.
+# Install the Docker CLI only; the Docker daemon runs in the separate
+# sandbox-engine service when using the local Docker Compose setup.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        docker-cli \
-        ca-certificates \
+    && apt-get install -y --no-install-recommends docker.io ca-certificates \
     && command -v docker \
     && rm -rf /var/lib/apt/lists/*
 
