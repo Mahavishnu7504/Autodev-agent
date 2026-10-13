@@ -1249,7 +1249,11 @@
     </header>
 
 
-    <div class="layout">
+            <div style="margin:12px 24px 0;padding:10px 12px;border:1px solid #294a82;border-radius:8px;background:#101c30;color:#bcd4f5;font-size:12px;">
+            Public resume demo · Choose a predefined task. Usage is rate-limited; private projects and history are not exposed.
+        </div>
+
+        <div class="layout">
 
 
         <!-- =====================================================
@@ -1376,15 +1380,24 @@
                     </label>
 
 
-                    <textarea id="task-input"
-                        placeholder="Example: Build a Python calculator with add, subtract, multiply and divide operations."></textarea>
+                    <label class="task-label" for="demo-task-select">
+                        CHOOSE A PUBLIC DEMO
+                    </label>
+                    <select id="demo-task-select" onchange="updateDemoPrompt()" style="width:100%;padding:11px;margin-bottom:10px;background:var(--code);color:var(--text);border:1px solid var(--border);border-radius:8px;">
+                        <option value="calculator">Python Calculator + Unit Tests</option>
+                        <option value="string_utils">String Utilities + Unit Tests</option>
+                        <option value="todo_model">In-memory Todo Module + Unit Tests</option>
+                    </select>
+                    <textarea id="task-input" readonly
+                        aria-label="Selected public demo task"
+                        placeholder="Choose a public demo above."></textarea>
 
 
                     <div class="task-actions">
 
                         <div class="task-hint">
 
-                            Runs autonomously in the background.
+                            Public demo: fixed tasks only, with hourly usage limits.
 
                         </div>
 
@@ -1792,6 +1805,20 @@
            START TASK
         ========================================================= */
 
+        const DEMO_PROMPTS = {
+            calculator: "Build a small Python calculator module with add, subtract, multiply, and divide functions and unit tests.",
+            string_utils: "Build a small Python string utilities module with reverse_text, is_palindrome, and count_words functions and unit tests.",
+            todo_model: "Build a small in-memory Python todo module with add_task, complete_task, and list_tasks functions and unit tests."
+        };
+
+        function updateDemoPrompt() {
+            const selector = document.getElementById("demo-task-select");
+            const input = document.getElementById("task-input");
+            if (selector && input) {
+                input.value = DEMO_PROMPTS[selector.value] || DEMO_PROMPTS.calculator;
+            }
+        }
+
         async function startTask() {
 
             const input =
@@ -1830,22 +1857,20 @@
 
             try {
 
+                const demoType =
+                    document.getElementById("demo-task-select").value;
+
                 const response =
                     await fetch(
-                        "/run-task-async",
+                        "/demo/run-task-async",
                         {
                             method: "POST",
-
                             headers: {
-                                "Content-Type":
-                                    "application/json"
+                                "Content-Type": "application/json"
                             },
-
-                            body:
-                                JSON.stringify({
-                                    task: task,
-                                    inputs: {}
-                                })
+                            body: JSON.stringify({
+                                demo_type: demoType
+                            })
                         }
                     );
 
@@ -2101,10 +2126,7 @@
                 status === "queued" ||
                 status === "running";
 
-            const retryable =
-                status === "failed" ||
-                status === "cancelled" ||
-                status === "interrupted";
+            const retryable = false;
 
             cancelButton.style.display =
                 active ? "inline-block" : "none";
@@ -2639,289 +2661,26 @@
         ========================================================= */
 
         async function loadProjects() {
-
-            const container =
-                document.getElementById(
-                    "projects"
-                );
-
-
-            const count =
-                document.getElementById(
-                    "project-count"
-                );
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        "/projects"
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        "HTTP " +
-                        response.status
-                    );
-
-                }
-
-
-                const data =
-                    await response.json();
-
-
-                const projects =
-                    Array.isArray(data)
-
-                        ? data
-
-                        : data.projects || [];
-
-
-                count.textContent =
-
-                    projects.length +
-
-                    (
-                        projects.length === 1
-
-                            ? " project"
-
-                            : " projects"
-                    );
-
-
-                container.innerHTML = "";
-
-
-                if (!projects.length) {
-
-                    container.innerHTML =
-                        '<div class="empty">No projects yet.</div>';
-
-                    return;
-
-                }
-
-
-                projects.forEach(
-                    project => {
-
-                        const workspace =
-                            getProjectWorkspace(
-                                project
-                            );
-
-
-                        const files =
-                            project.file_count ??
-
-                            (
-                                Array.isArray(
-                                    project.files
-                                )
-
-                                    ? project.files.length
-
-                                    : 0
-                            );
-
-
-                        const item =
-                            document.createElement(
-                                "button"
-                            );
-
-
-                        item.className =
-                            "project-item";
-
-
-                        item.onclick = () =>
-                            openProject(
-                                workspace
-                            );
-
-
-                        item.innerHTML = `
-
-                        <div class="project-name">
-
-                            ${escapeHtml(
-                            projectName(
-                                project
-                            )
-                        )}
-
-                        </div>
-
-                        <div class="project-meta">
-
-                            ${files} files
-
-                        </div>
-
-                    `;
-
-
-                        container.appendChild(
-                            item
-                        );
-
-                    }
-                );
-
-            }
-            catch (error) {
-
+            const container = document.getElementById("projects");
+            const count = document.getElementById("project-count");
+            if (count) count.textContent = "Demo mode";
+            if (container) {
                 container.innerHTML =
-                    '<div class="empty">Unable to load projects.</div>';
-
-                count.textContent =
-                    "Unavailable";
-
-                console.error(
-                    error
-                );
-
+                    '<div class="empty">Project history is private in the public demo.</div>';
             }
-
         }
-
 
         /* =========================================================
            RECENT TASKS
         ========================================================= */
 
         async function loadTasks() {
-
-            const container =
-                document.getElementById("recent-tasks");
-
-            try {
-
-                const response =
-                    await fetch("/tasks?limit=12");
-
-                const data =
-                    await response.json();
-
-                if (!response.ok) {
-                    throw new Error(
-                        data.detail ||
-                        "Unable to load tasks."
-                    );
-                }
-
-                const tasks =
-                    data.tasks || [];
-
-                container.innerHTML = "";
-
-                if (!tasks.length) {
-                    container.innerHTML =
-                        '<div class="empty">No tasks yet.</div>';
-                    return;
-                }
-
-                tasks.forEach(task => {
-
-                    const item =
-                        document.createElement("div");
-
-                    item.className = "recent-item";
-
-                    item.onclick = async () => {
-
-                        currentTaskId =
-                            task.task_id;
-
-                        document.getElementById(
-                            "task-status"
-                        ).style.display = "block";
-
-                        document.getElementById(
-                            "execution-area"
-                        ).style.display = "grid";
-
-                        await refreshTask();
-
-                        document.getElementById(
-                            "home-view"
-                        ).scrollIntoView({
-                            behavior: "smooth"
-                        });
-
-                        if (
-                            task.status === "queued" ||
-                            task.status === "running"
-                        ) {
-                            startPolling();
-                        }
-                    };
-
-                    const status =
-                        String(
-                            task.status || "unknown"
-                        ).toLowerCase();
-
-                    const statusText =
-                        status === "completed"
-                            ? "Completed"
-                            : status === "failed"
-                                ? "Failed"
-                                : status === "cancelled"
-                                    ? "Cancelled"
-                                    : status === "interrupted"
-                                        ? "Interrupted"
-                                        : status === "running"
-                                            ? "Running"
-                                            : "Queued";
-
-                    item.innerHTML = `
-                        <div>
-                            <div class="recent-task">
-                                ${escapeHtml(
-                                    task.task ||
-                                    "Untitled task"
-                                )}
-                            </div>
-
-                            <div class="recent-meta">
-                                ${formatPhase(task.phase)}
-                                ·
-                                ${Number(task.progress || 0)}%
-                            </div>
-                        </div>
-
-                        <div
-                            class="recent-status"
-                            title="${escapeHtml(task.task_id)}"
-                        >
-                            ${escapeHtml(statusText)}
-                        </div>
-                    `;
-
-                    container.appendChild(item);
-                });
-
-            }
-            catch (error) {
-
+            const container = document.getElementById("recent-tasks");
+            if (container) {
                 container.innerHTML =
-                    '<div class="empty">Unable to load tasks.</div>';
-
-                console.error(
-                    "Task loading error:",
-                    error
-                );
+                    '<div class="empty">Only the task you start in this session is shown. Shared task history is private.</div>';
             }
         }
-
 
         /* =========================================================
            OPEN PROJECT
@@ -3729,64 +3488,12 @@
         ========================================================= */
 
         async function init() {
-
+            updateDemoPrompt();
             await Promise.all([
                 loadProjects(),
                 loadTasks()
             ]);
-
             startHealthPolling();
-
-            try {
-
-                const response =
-                    await fetch("/tasks?limit=1");
-
-                if (!response.ok) {
-                    return;
-                }
-
-                const data =
-                    await response.json();
-
-                const tasks =
-                    data.tasks || [];
-
-                if (!tasks.length) {
-                    return;
-                }
-
-                const latest =
-                    tasks[0];
-
-                currentTaskId =
-                    latest.task_id;
-
-                document.getElementById(
-                    "task-status"
-                ).style.display = "block";
-
-                document.getElementById(
-                    "execution-area"
-                ).style.display = "grid";
-
-                await refreshTask();
-
-                if (
-                    latest.status === "queued" ||
-                    latest.status === "running"
-                ) {
-                    startPolling();
-                }
-
-            }
-            catch (error) {
-
-                console.error(
-                    "Unable to restore latest task:",
-                    error
-                );
-            }
         }
 
 

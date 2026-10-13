@@ -35,6 +35,33 @@ DASHBOARD_FILE = BASE_DIR / "dashboard.html"
 
 APP_VERSION = "3.5.0"
 
+# Public resume-demo controls. Only fixed demo tasks are available without auth.
+PUBLIC_DEMO_TASK_IDS: set[str] = set()
+PUBLIC_DEMO_REQUESTS: dict[str, list[float]] = {}
+PUBLIC_DEMO_GLOBAL_REQUESTS: list[float] = []
+PUBLIC_DEMO_WINDOW_SECONDS = 60 * 60
+PUBLIC_DEMO_PER_IP_LIMIT = 3
+PUBLIC_DEMO_GLOBAL_LIMIT = 10
+PUBLIC_DEMO_MAX_ACTIVE = 2
+
+PUBLIC_DEMO_TASKS = {
+    "calculator": (
+        "Build a small Python calculator module with add, subtract, "
+        "multiply, and divide functions and unit tests. Keep it self-contained. "
+        "Do not use network access, subprocesses, shell commands, or environment secrets."
+    ),
+    "string_utils": (
+        "Build a small Python string utilities module with reverse_text, "
+        "is_palindrome, and count_words functions and unit tests. Keep it self-contained. "
+        "Do not use network access, subprocesses, shell commands, or environment secrets."
+    ),
+    "todo_model": (
+        "Build a small in-memory Python todo module with add_task, complete_task, "
+        "and list_tasks functions and unit tests. Keep it self-contained. "
+        "Do not use network access, subprocesses, shell commands, or environment secrets."
+    ),
+}
+
 app = FastAPI(
     title="AutoDev Agent",
     description=(
@@ -46,12 +73,27 @@ app = FastAPI(
 )
 
 
-# AUTODEV_AUTH_MIDDLEWARE
+# Public resume demo routes are intentionally limited. All other routes require auth.
 @app.middleware("http")
 async def require_api_authentication(request: Request, call_next):
-    # Docker and local monitoring must be able to check service health.
-    if request.url.path == "/health":
+    path = request.url.path
+    method = request.method.upper()
+
+    if method == "GET" and path in {"/", "/dashboard", "/health"}:
         return await call_next(request)
+
+    if method == "POST" and path == "/demo/run-task-async":
+        return await call_next(request)
+
+    task_match = re.fullmatch(r"/tasks/([^/]+)", path)
+    if method == "GET" and task_match:
+        if task_match.group(1) in PUBLIC_DEMO_TASK_IDS:
+            return await call_next(request)
+
+    cancel_match = re.fullmatch(r"/tasks/([^/]+)/cancel", path)
+    if method == "POST" and cancel_match:
+        if cancel_match.group(1) in PUBLIC_DEMO_TASK_IDS:
+            return await call_next(request)
 
     expected_user = os.getenv("AUTODEV_USERNAME", "")
     expected_password = os.getenv("AUTODEV_PASSWORD", "")
@@ -110,6 +152,54 @@ class TaskRequest(BaseModel):
 
 
 TaskRequest.model_rebuild()
+
+
+class PublicDemoRequest(BaseModel):
+    demo_type: str = Field(..., min_length=1, max_length=40)
+
+
+def enforce_public_demo_limits(request: Request) -> None:
+    now = time.monotonic()
+    cutoff = now - PUBLIC_DEMO_WINDOW_SECONDS
+    client_ip = request.client.host if request.client else "unknown"
+
+    recent_for_ip = [
+        stamp for stamp in PUBLIC_DEMO_REQUESTS.get(client_ip, [])
+        if stamp > cutoff
+    ]
+    recent_global = [
+        stamp for stamp in PUBLIC_DEMO_GLOBAL_REQUESTS
+        if stamp > cutoff
+    ]
+
+    active_demo_count = 0
+    for demo_id in list(PUBLIC_DEMO_TASK_IDS):
+        record = task_manager.get_task(demo_id)
+        if record and record.get("status") in {"queued", "running"}:
+            active_demo_count += 1
+
+    if active_demo_count >= PUBLIC_DEMO_MAX_ACTIVE:
+        raise HTTPException(
+            status_code=429,
+            detail="The public demo is busy. Please try again in a few minutes.",
+        )
+
+    if len(recent_for_ip) >= PUBLIC_DEMO_PER_IP_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail="Public demo limit reached for this network. Try again later.",
+        )
+
+    if len(recent_global) >= PUBLIC_DEMO_GLOBAL_LIMIT:
+        raise HTTPException(
+            status_code=429,
+            detail="The public demo has reached its hourly limit. Please try again later.",
+        )
+
+    recent_for_ip.append(now)
+    recent_global.append(now)
+    PUBLIC_DEMO_REQUESTS[client_ip] = recent_for_ip
+    PUBLIC_DEMO_GLOBAL_REQUESTS[:] = recent_global
 
 
 IGNORED_PROJECT_DIRS = {
@@ -557,6 +647,45 @@ def run_task_async(request: TaskRequest):
         "retry_url": (
             f"/tasks/{live_record['task_id']}/retry"
         ),
+    }
+
+
+@app.post("/demo/run-task-async", status_code=202)
+def run_public_demo_task(body: PublicDemoRequest, request: Request):
+    """Run one of a few fixed, rate-limited resume-demo tasks."""
+    demo_type = body.demo_type.strip().lower()
+    if demo_type not in PUBLIC_DEMO_TASKS:
+        raise HTTPException(
+            status_code=400,
+            detail="Choose one of the supported demo tasks.",
+        )
+
+    enforce_public_demo_limits(request)
+
+    task = PUBLIC_DEMO_TASKS[demo_type]
+    record = task_manager.create_task(task=task, inputs={})
+    task_id = record["task_id"]
+    PUBLIC_DEMO_TASK_IDS.add(task_id)
+
+    try:
+        task_manager.start_task(task_id)
+    except Exception as exc:
+        PUBLIC_DEMO_TASK_IDS.discard(task_id)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Demo task could not be started: {exc}",
+        )
+
+    live_record = task_manager.get_task(task_id) or record
+    return {
+        "status": "accepted",
+        "task_id": task_id,
+        "phase": live_record.get("phase"),
+        "progress": live_record.get("progress", 0),
+        "task_status": live_record.get("status"),
+        "status_url": f"/tasks/{task_id}",
+        "cancel_url": f"/tasks/{task_id}/cancel",
+        "demo_mode": True,
     }
 
 
