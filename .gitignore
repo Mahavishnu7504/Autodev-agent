@@ -6,3 +6,12 @@ venv/
 
 generated/
 task_history.json
+
+
+# Local AI memory database
+memory/
+
+# Python cache in all folders
+__pycache__/
+**/__pycache__/
+*.py[cod]
